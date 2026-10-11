@@ -216,7 +216,7 @@ def health():
     return jsonify({
         "status": "healthy",
         "service": "PoDS Crop Recommendation Server",
-        "version": "0.5.0"
+        "version": "0.5.1"
     })
 
 @app.route('/api/validate-dataset', methods=['POST'])

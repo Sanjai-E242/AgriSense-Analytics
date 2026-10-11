@@ -163,7 +163,7 @@ class DecisionTreeNode:
 
 class DecisionTreeModel:
     """CART Decision Tree Classifier with bounded recursion, fast Gini split, and memory efficiency."""
-    def __init__(self, max_depth: int = 8, min_samples_split: int = 4, random_state: int = 42):
+    def __init__(self, max_depth: int = 7, min_samples_split: int = 4, random_state: int = 42):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.random_state = random_state
@@ -212,8 +212,8 @@ class DecisionTreeModel:
                 continue
 
             thresholds = np.unique(col)
-            if len(thresholds) > 16:
-                thresholds = np.percentile(col, np.linspace(10, 90, 10))
+            if len(thresholds) > 10:
+                thresholds = np.percentile(col, np.linspace(15, 85, 8))
 
             for thresh in thresholds:
                 left_mask = col <= thresh
@@ -340,7 +340,7 @@ class DecisionTreeModel:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         tree = cls(
-            max_depth=data.get("max_depth", 8),
+            max_depth=data.get("max_depth", 7),
             min_samples_split=data.get("min_samples_split", 4),
             random_state=data.get("random_state", 42)
         )
@@ -354,11 +354,11 @@ class DecisionTreeModel:
 class RandomForestModel:
     """
     Random Forest Classifier with Bootstrap Aggregation & Feature Subsampling.
-    Configured with resource-bounded defaults (12 estimators, max_depth 8) to
+    Configured with resource-bounded defaults (10 estimators, max_depth 7) to
     prevent high memory churn and avoid SIGKILL OOM events on resource-constrained
     environments (such as Render free instances with 512MB RAM and 0.1 vCPU).
     """
-    def __init__(self, n_estimators: int = 12, max_depth: int = 8, min_samples_split: int = 4, random_state: int = 42):
+    def __init__(self, n_estimators: int = 10, max_depth: int = 7, min_samples_split: int = 4, random_state: int = 42):
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -411,8 +411,8 @@ class RandomForestModel:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         rf = cls(
-            n_estimators=data.get("n_estimators", 12),
-            max_depth=data.get("max_depth", 8),
+            n_estimators=data.get("n_estimators", 10),
+            max_depth=data.get("max_depth", 7),
             min_samples_split=data.get("min_samples_split", 4),
             random_state=data.get("random_state", 42)
         )
@@ -874,11 +874,11 @@ def train_and_evaluate_pipeline(
     models_spec = {
         "Decision Tree": {
             "cls": DecisionTreeModel,
-            "kwargs": {"max_depth": 8, "min_samples_split": 4, "random_state": RANDOM_SEED}
+            "kwargs": {"max_depth": 7, "min_samples_split": 4, "random_state": RANDOM_SEED}
         },
         "Random Forest": {
             "cls": RandomForestModel,
-            "kwargs": {"n_estimators": 12, "max_depth": 8, "min_samples_split": 4, "random_state": RANDOM_SEED}
+            "kwargs": {"n_estimators": 10, "max_depth": 7, "min_samples_split": 4, "random_state": RANDOM_SEED}
         },
         "K-Nearest Neighbors": {
             "cls": KNNClassifierModel,
