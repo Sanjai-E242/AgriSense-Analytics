@@ -69,7 +69,8 @@ class ModelEvaluationController {
   async checkExistingModel() {
     try {
       const res = await fetch('/api/model-status');
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
         const data = await res.json();
         if (data.trained && data.artifact_valid && data.metadata) {
           const champion = data.champion_model || data.metadata.champion_model || 'Champion Model';
@@ -252,9 +253,11 @@ class ModelEvaluationController {
       let csvText = '';
       if (ingestion.rawCsvText) {
         csvText = ingestion.rawCsvText;
-      } else {
+      } else if (dataset.rawCsvText) {
+        csvText = dataset.rawCsvText;
+      } else if (Array.isArray(dataset.rows) && dataset.rows.length > 0) {
         const header = dataset.columns.join(',');
-        const rows = dataset.rows ? dataset.rows.map(r => r.join(',')) : [];
+        const rows = dataset.rows.map(r => r.join(','));
         csvText = [header, ...rows].join('\n');
       }
 
@@ -269,7 +272,24 @@ class ModelEvaluationController {
         })
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let data = null;
+
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const rawText = await res.text();
+        const cleanSnippet = rawText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        let errorDetail = `Server returned HTTP ${res.status} (${res.statusText || 'Unexpected response'}).`;
+        if (res.status === 504 || res.status === 502) {
+          errorDetail = `Training timed out on host gateway (HTTP ${res.status}).`;
+        } else if (res.status === 500) {
+          errorDetail = `Server encountered an internal error (HTTP 500): ${cleanSnippet.slice(0, 160) || 'Internal Server Error'}.`;
+        } else if (cleanSnippet) {
+          errorDetail += ` Response: ${cleanSnippet.slice(0, 160)}`;
+        }
+        throw new Error(errorDetail);
+      }
 
       if (!res.ok || !data.success) {
         this.showError(data.message || 'Failed to train classification pipeline.');
@@ -330,7 +350,7 @@ class ModelEvaluationController {
       }
 
     } catch (err) {
-      this.showError(`Training execution error: ${err.message}. Ensure backend is running.`);
+      this.showError(`Training execution error: ${err.message}`);
       if (this.badge) {
         this.badge.className = 'badge badge-neutral';
         this.badge.textContent = 'Pipeline Inactive';

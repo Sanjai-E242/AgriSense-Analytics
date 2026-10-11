@@ -10,6 +10,7 @@ import sqlite3
 import datetime
 from typing import Dict, Any, List
 from flask import Flask, send_from_directory, request, jsonify
+import numpy as np
 import pandas as pd
 from validator import validate_csv_content
 
@@ -114,6 +115,52 @@ def clear_all_prediction_history() -> bool:
     except Exception:
         return False
 
+def sanitize_for_json(obj: Any) -> Any:
+    """Recursively converts NumPy scalars and arrays to native Python types for clean JSON serialization."""
+    if isinstance(obj, dict):
+        return {str(k): sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [sanitize_for_json(v) for v in obj]
+    elif isinstance(obj, (np.integer, int)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, float)):
+        return float(obj)
+    elif isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return sanitize_for_json(obj.tolist())
+    return obj
+
+@app.errorhandler(400)
+def handle_bad_request(error):
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error_type": "BAD_REQUEST",
+            "message": str(getattr(error, 'description', error))
+        }), 400
+    return jsonify({"success": False, "error_type": "BAD_REQUEST", "message": "Bad request."}), 400
+
+@app.errorhandler(404)
+def handle_not_found(error):
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error_type": "NOT_FOUND",
+            "message": f"API endpoint '{request.path}' not found."
+        }), 404
+    return jsonify({"success": False, "error_type": "NOT_FOUND", "message": f"Resource '{request.path}' not found."}), 404
+
+@app.errorhandler(405)
+def handle_method_not_allowed(error):
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error_type": "METHOD_NOT_ALLOWED",
+            "message": f"HTTP method '{request.method}' not allowed for '{request.path}'."
+        }), 405
+    return jsonify({"success": False, "error_type": "METHOD_NOT_ALLOWED", "message": "Method not allowed."}), 405
+
 @app.errorhandler(413)
 def request_entity_too_large(error):
     return jsonify({
@@ -121,6 +168,22 @@ def request_entity_too_large(error):
         "error_type": "FILE_TOO_LARGE",
         "message": "File exceeds maximum permitted size of 15 MB."
     }), 413
+
+@app.errorhandler(500)
+@app.errorhandler(Exception)
+def handle_internal_error(error):
+    app.logger.error(f"Internal error on {request.path}: {str(error)}", exc_info=True)
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error_type": "INTERNAL_SERVER_ERROR",
+            "message": f"Internal server error: {str(error)}"
+        }), 500
+    return jsonify({
+        "success": False,
+        "error_type": "INTERNAL_SERVER_ERROR",
+        "message": f"An unexpected server error occurred: {str(error)}"
+    }), 500
 
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
@@ -132,9 +195,21 @@ def index():
 
 @app.route('/<path:path>')
 def static_proxy(path):
+    if path.startswith('api/') or path == 'api':
+        return jsonify({
+            "success": False,
+            "error_type": "NOT_FOUND",
+            "message": f"API endpoint '/{path}' not found."
+        }), 404
     if os.path.exists(os.path.join(FRONTEND_DIR, path)):
         return send_from_directory(FRONTEND_DIR, path)
-    return send_from_directory(BASE_DIR, path)
+    if os.path.exists(os.path.join(BASE_DIR, path)):
+        return send_from_directory(BASE_DIR, path)
+    return jsonify({
+        "success": False,
+        "error_type": "NOT_FOUND",
+        "message": f"Resource '{path}' not found."
+    }), 404
 
 @app.route('/api/health', methods=['GET'])
 def health():
@@ -327,67 +402,93 @@ def model_status():
             "error": f"Model artifact found but corrupted/invalid: {str(e)}"
         })
 
-@app.route('/api/train-models', methods=['POST'])
+@app.route('/api/train-models', methods=['GET', 'POST'])
 def train_models():
     """
     Executes reproducible ML training across Decision Tree, Random Forest, and KNN.
     Requires explicit user approval.
     Production API strictly rejects fixture bypass (allow_fixture_for_testing is ALWAYS False).
     """
-    data = request.get_json(silent=True) or {}
-    req_dataset_name = data.get("dataset_name")
-    dataset_name = req_dataset_name or "uploaded_dataset.csv"
-    approved_by_user = bool(data.get("approved_by_user", False))
-    allow_fixture_for_testing = False
-    csv_text = data.get("csv_text", "")
-
-    if not approved_by_user:
+    if request.method != 'POST':
         return jsonify({
             "success": False,
-            "error_type": "APPROVAL_REQUIRED",
-            "message": "Project owner confirmation is required. You must check the authorization box before training."
-        }), 400
-
-    dataset_fingerprint = data.get("dataset_fingerprint")
-    active_csv = os.path.join(DATA_DIR, "active_dataset.csv")
-    active_meta = os.path.join(DATA_DIR, "active_dataset.json")
-
-    # If csv_text was not sent in JSON body, look up persisted active dataset
-    if not csv_text or len(csv_text.strip()) == 0:
-        if os.path.exists(active_csv):
-            try:
-                with open(active_csv, "r", encoding="utf-8") as f:
-                    csv_text = f.read()
-            except Exception as e:
-                return jsonify({
-                    "success": False,
-                    "error_type": "READ_ERROR",
-                    "message": f"Could not read active dataset from server: {str(e)}"
-                }), 500
-
-    # Ensure dataset_fingerprint is sourced from active dataset metadata if available
-    if os.path.exists(active_meta):
-        try:
-            with open(active_meta, "r", encoding="utf-8") as f:
-                meta = json.load(f)
-                if not req_dataset_name:
-                    dataset_name = meta.get("filename", dataset_name)
-                if not dataset_fingerprint:
-                    dataset_fingerprint = meta.get("dataset_fingerprint")
-        except Exception:
-            pass
-
-    if not csv_text or len(csv_text.strip()) == 0:
-        return jsonify({
-            "success": False,
-            "error_type": "NO_DATASET_CONTENT",
-            "message": "No dataset records provided. Please ingest and inspect a dataset first."
-        }), 400
-
+            "error_type": "METHOD_NOT_ALLOWED",
+            "message": f"HTTP method '{request.method}' not allowed for '/api/train-models'. Only POST is supported."
+        }), 405
     try:
+        data = request.get_json(silent=True) or {}
+        req_dataset_name = data.get("dataset_name")
+        dataset_name = req_dataset_name or "uploaded_dataset.csv"
+        approved_by_user = bool(data.get("approved_by_user", False))
+        allow_fixture_for_testing = False
+        csv_text = data.get("csv_text", "")
+
+        if not approved_by_user:
+            return jsonify({
+                "success": False,
+                "error_type": "APPROVAL_REQUIRED",
+                "message": "Project owner confirmation is required. You must check the authorization box before training."
+            }), 400
+
+        dataset_fingerprint = data.get("dataset_fingerprint")
+        os.makedirs(DATA_DIR, exist_ok=True)
+        os.makedirs(MODELS_DIR, exist_ok=True)
+        active_csv = os.path.join(DATA_DIR, "active_dataset.csv")
+        active_meta = os.path.join(DATA_DIR, "active_dataset.json")
+
+        # Check if client-provided csv_text has valid data records
+        csv_has_rows = False
+        if csv_text and isinstance(csv_text, str) and len(csv_text.strip()) > 0:
+            lines = [l for l in csv_text.strip().splitlines() if l.strip()]
+            if len(lines) >= 2:
+                csv_has_rows = True
+
+        # If client csv_text is missing or lacks data rows, fall back to persisted active dataset
+        if not csv_has_rows:
+            if os.path.exists(active_csv):
+                try:
+                    with open(active_csv, "r", encoding="utf-8") as f:
+                        csv_text = f.read()
+                    lines = [l for l in csv_text.strip().splitlines() if l.strip()]
+                    if len(lines) >= 2:
+                        csv_has_rows = True
+                except Exception as e:
+                    return jsonify({
+                        "success": False,
+                        "error_type": "READ_ERROR",
+                        "message": f"Could not read active dataset from server: {str(e)}"
+                    }), 500
+
+        # Ensure dataset_fingerprint is sourced from active dataset metadata if available
+        if os.path.exists(active_meta):
+            try:
+                with open(active_meta, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                    if not req_dataset_name:
+                        dataset_name = meta.get("filename", dataset_name)
+                    if not dataset_fingerprint:
+                        dataset_fingerprint = meta.get("dataset_fingerprint")
+            except Exception:
+                pass
+
+        if not csv_has_rows:
+            return jsonify({
+                "success": False,
+                "error_type": "NO_DATASET_CONTENT",
+                "message": "No dataset records provided. Please ingest and inspect a dataset first in Dataset Explorer."
+            }), 400
+
         from pipeline import train_and_evaluate_pipeline
 
-        df = pd.read_csv(io.StringIO(csv_text))
+        try:
+            df = pd.read_csv(io.StringIO(csv_text))
+        except Exception as pe:
+            return jsonify({
+                "success": False,
+                "error_type": "MALFORMED_CSV",
+                "message": f"Could not parse CSV content: {str(pe)}"
+            }), 400
+
         result = train_and_evaluate_pipeline(
             df=df,
             dataset_name=dataset_name,
@@ -395,8 +496,36 @@ def train_models():
             allow_fixture_for_testing=allow_fixture_for_testing,
             dataset_fingerprint=dataset_fingerprint
         )
+
+        if result.get("success"):
+            # Ensure dataset files are persisted locally if not already saved
+            if not os.path.exists(active_csv) or os.path.getsize(active_csv) == 0:
+                try:
+                    with open(active_csv, "w", encoding="utf-8") as f:
+                        f.write(csv_text)
+                except Exception:
+                    pass
+            if not os.path.exists(active_meta):
+                try:
+                    classes_list = result.get("classes", [])
+                    with open(active_meta, "w", encoding="utf-8") as f:
+                        json.dump({
+                            "filename": dataset_name,
+                            "rows": len(df),
+                            "columns": list(df.columns),
+                            "classes": classes_list,
+                            "class_count": len(classes_list),
+                            "dataset_fingerprint": result.get("dataset_fingerprint", dataset_fingerprint),
+                            "provenance_status": "Source verified (Trained Model)",
+                            "uploaded_at": datetime.datetime.now().isoformat()
+                        }, f, indent=2)
+                except Exception:
+                    pass
+
+        sanitized_result = sanitize_for_json(result)
         status_code = 200 if result.get("success") else 400
-        return jsonify(result), status_code
+        return jsonify(sanitized_result), status_code
+
     except Exception as e:
         return jsonify({
             "success": False,

@@ -87,6 +87,68 @@ class TestAgriSenseAPI(unittest.TestCase):
         h_cleared = self.app.get('/api/prediction-history').get_json()
         self.assertEqual(h_cleared.get("count"), 0)
 
+    def test_training_fails_missing_dataset_returns_json_400(self):
+        """Training with approval but without dataset content returns useful JSON 400."""
+        self.app.post('/api/dataset-reset')
+        res = self.app.post('/api/train-models', json={
+            "approved_by_user": True,
+            "dataset_name": "missing.csv",
+            "csv_text": ""
+        })
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("application/json", res.headers.get("content-type", ""))
+        data = res.get_json()
+        self.assertFalse(data.get("success"))
+        self.assertEqual(data.get("error_type"), "NO_DATASET_CONTENT")
+
+    def test_api_404_returns_json_not_html(self):
+        """Unrecognized /api/* endpoints return JSON 404 rather than HTML error pages."""
+        res = self.app.get('/api/nonexistent-endpoint')
+        self.assertEqual(res.status_code, 404)
+        self.assertIn("application/json", res.headers.get("content-type", ""))
+        data = res.get_json()
+        self.assertFalse(data.get("success"))
+        self.assertEqual(data.get("error_type"), "NOT_FOUND")
+
+    def test_api_405_method_not_allowed_returns_json(self):
+        """Disallowed HTTP methods on API routes return JSON 405 rather than HTML error pages."""
+        res = self.app.get('/api/train-models')
+        self.assertEqual(res.status_code, 405)
+        self.assertIn("application/json", res.headers.get("content-type", ""))
+        data = res.get_json()
+        self.assertFalse(data.get("success"))
+        self.assertEqual(data.get("error_type"), "METHOD_NOT_ALLOWED")
+
+    def test_training_successful_small_dataset(self):
+        """Valid dataset training succeeds and persists matching active metadata and model."""
+        self.app.post('/api/dataset-reset')
+        # Create a valid synthetic dataset of 50 samples with 2 classes
+        lines = ["N,P,K,temperature,humidity,ph,rainfall,label"]
+        for i in range(25):
+            lines.append(f"{50+i},{40+i},{30+i},25.0,80.0,6.5,150.0,crop_a")
+        for i in range(25):
+            lines.append(f"{80+i},{20+i},{10+i},30.0,60.0,7.0,100.0,crop_b")
+        csv_content = "\n".join(lines)
+
+        res = self.app.post('/api/train-models', json={
+            "approved_by_user": True,
+            "dataset_name": "test_crop_dataset.csv",
+            "csv_text": csv_content
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("application/json", res.headers.get("content-type", ""))
+        data = res.get_json()
+        self.assertTrue(data.get("success"))
+        self.assertIn("champion_model", data)
+        self.assertIn("benchmark_results", data)
+
+        # Model status should now reflect trained model
+        m_res = self.app.get('/api/model-status')
+        self.assertEqual(m_res.status_code, 200)
+        m_data = m_res.get_json()
+        self.assertTrue(m_data.get("trained"))
+        self.assertTrue(m_data.get("artifact_valid"))
+
 
 if __name__ == '__main__':
     unittest.main()

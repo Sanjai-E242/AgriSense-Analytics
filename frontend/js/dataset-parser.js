@@ -403,7 +403,8 @@ class DatasetIngestionController {
       summaryStats,
       correlationMatrix,
       corrNumericFeatures,
-      checklist
+      checklist,
+      rawCsvText: this.rawCsvText
     };
 
     // Render telemetry in UI

@@ -172,6 +172,10 @@ class DecisionTreeModel:
     def _gini(self, y: np.ndarray) -> float:
         if len(y) == 0:
             return 0.0
+        if np.issubdtype(y.dtype, np.integer):
+            counts = np.bincount(y)
+            probs = counts[counts > 0] / len(y)
+            return 1.0 - float(np.sum(probs ** 2))
         _, counts = np.unique(y, return_counts=True)
         probs = counts / len(y)
         return 1.0 - float(np.sum(probs ** 2))
@@ -183,7 +187,18 @@ class DecisionTreeModel:
 
         n_samples, n_features = X.shape
         features = feat_subset if feat_subset is not None else list(range(n_features))
-        current_gini = self._gini(y)
+        is_int = np.issubdtype(y.dtype, np.integer)
+
+        if is_int:
+            cnts = np.bincount(y)
+            n_classes = len(cnts)
+            curr_p = cnts[cnts > 0] / n_samples
+            current_gini = 1.0 - float(np.sum(curr_p ** 2))
+        else:
+            current_gini = self._gini(y)
+
+        if current_gini <= 0.0:
+            return None, None
 
         for feat in features:
             col = X[:, feat]
@@ -193,13 +208,23 @@ class DecisionTreeModel:
 
             for thresh in thresholds:
                 left_mask = col <= thresh
-                right_mask = ~left_mask
-                if np.sum(left_mask) == 0 or np.sum(right_mask) == 0:
+                n_left = int(np.sum(left_mask))
+                if n_left == 0 or n_left == n_samples:
                     continue
+                n_right = n_samples - n_left
 
-                left_gini = self._gini(y[left_mask])
-                right_gini = self._gini(y[right_mask])
-                p_left = np.sum(left_mask) / n_samples
+                if is_int:
+                    left_cnts = np.bincount(y[left_mask], minlength=n_classes)
+                    right_cnts = cnts - left_cnts
+                    lp = left_cnts[left_cnts > 0] / n_left
+                    left_gini = 1.0 - float(np.sum(lp ** 2))
+                    rp = right_cnts[right_cnts > 0] / n_right
+                    right_gini = 1.0 - float(np.sum(rp ** 2))
+                else:
+                    left_gini = self._gini(y[left_mask])
+                    right_gini = self._gini(y[~left_mask])
+
+                p_left = n_left / n_samples
                 p_right = 1.0 - p_left
                 weighted_gini = p_left * left_gini + p_right * right_gini
                 gain = current_gini - weighted_gini
@@ -211,13 +236,19 @@ class DecisionTreeModel:
 
         return best_feat, best_thresh
 
-    def _build_tree(self, X: np.ndarray, y: np.ndarray, depth: int = 0, feat_subset_size: Optional[int] = None) -> DecisionTreeNode:
+    def _build_tree(self, X: np.ndarray, y: np.ndarray, depth: int = 0, feat_subset_size: Optional[int] = None, classes: Optional[np.ndarray] = None) -> DecisionTreeNode:
         n_samples, n_features = X.shape
-        unique_classes, counts = np.unique(y, return_counts=True)
-
-        if len(unique_classes) == 1 or depth >= self.max_depth or n_samples < self.min_samples_split:
-            leaf_val = unique_classes[np.argmax(counts)]
-            return DecisionTreeNode(value=str(leaf_val))
+        if classes is not None and np.issubdtype(y.dtype, np.integer):
+            cnts = np.bincount(y, minlength=len(classes))
+            n_unique = int(np.count_nonzero(cnts))
+            if n_unique <= 1 or depth >= self.max_depth or n_samples < self.min_samples_split:
+                leaf_val = classes[np.argmax(cnts)]
+                return DecisionTreeNode(value=str(leaf_val))
+        else:
+            unique_classes, counts = np.unique(y, return_counts=True)
+            if len(unique_classes) == 1 or depth >= self.max_depth or n_samples < self.min_samples_split:
+                leaf_val = unique_classes[np.argmax(counts)]
+                return DecisionTreeNode(value=str(leaf_val))
 
         rng = np.random.RandomState(self.random_state + depth)
         feat_subset = None
@@ -226,18 +257,24 @@ class DecisionTreeModel:
 
         best_feat, best_thresh = self._best_split(X, y, feat_subset)
         if best_feat is None:
-            leaf_val = unique_classes[np.argmax(counts)]
+            if classes is not None and np.issubdtype(y.dtype, np.integer):
+                leaf_val = classes[np.argmax(cnts)]
+            else:
+                leaf_val = unique_classes[np.argmax(counts)]
             return DecisionTreeNode(value=str(leaf_val))
 
         left_mask = X[:, best_feat] <= best_thresh
         right_mask = ~left_mask
 
-        left_child = self._build_tree(X[left_mask], y[left_mask], depth + 1, feat_subset_size)
-        right_child = self._build_tree(X[right_mask], y[right_mask], depth + 1, feat_subset_size)
+        left_child = self._build_tree(X[left_mask], y[left_mask], depth + 1, feat_subset_size, classes)
+        right_child = self._build_tree(X[right_mask], y[right_mask], depth + 1, feat_subset_size, classes)
         return DecisionTreeNode(feature=int(best_feat), threshold=float(best_thresh), left=left_child, right=right_child)
 
     def fit(self, X: np.ndarray, y: np.ndarray, feat_subset_size: Optional[int] = None):
-        self.root = self._build_tree(np.asarray(X, dtype=float), np.asarray(y, dtype=str), depth=0, feat_subset_size=feat_subset_size)
+        X = np.asarray(X, dtype=float)
+        y = np.asarray(y)
+        classes, y_int = np.unique(y, return_inverse=True)
+        self.root = self._build_tree(X, y_int, depth=0, feat_subset_size=feat_subset_size, classes=classes)
         return self
 
     def _predict_sample(self, node: DecisionTreeNode, x: np.ndarray):
