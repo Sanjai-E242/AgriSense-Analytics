@@ -1,0 +1,142 @@
+/**
+ * ==========================================================================
+ * Crop Recommendation System - Design Tokens
+ * Principles of Data Science (PoDS) Project Foundation
+ * ==========================================================================
+ * Strict Visual Foundation:
+ * - Alabaster: #F4F1EB
+ * - Moss Green: #7AA05A
+ * - Slate Green: #2D5A4A
+ * - Dark Emerald: #0D4C3C
+ */
+
+:root {
+  /* ------------------------------------------------------------------------
+   * 1. Primary Palette Tokens
+   * ------------------------------------------------------------------------ */
+  --color-alabaster: #F4F1EB;
+  --color-alabaster-surface: #FAF8F5;
+  --color-alabaster-card: #FFFFFF;
+  --color-alabaster-border: #E3DDD2;
+  --color-alabaster-border-subtle: #EDE8DE;
+
+  --color-moss-green: #7AA05A;
+  --color-moss-green-hover: #6C8E4E;
+  --color-moss-green-light: #EBF2E4;
+  --color-moss-green-subtle: #F2F7ED;
+  --color-moss-green-dark: #4F7034;
+
+  --color-slate-green: #2D5A4A;
+  --color-slate-green-hover: #23483B;
+  --color-slate-green-light: #437865;
+  --color-slate-green-subtle: #E8EFEA;
+  --color-slate-green-surface: #1E4135;
+
+  --color-dark-emerald: #0D4C3C;
+  --color-dark-emerald-darker: #072B22;
+  --color-dark-emerald-light: #16604D;
+  --color-dark-emerald-border: #1B5E4C;
+  --color-dark-emerald-hover: #135544;
+
+  /* ------------------------------------------------------------------------
+   * 2. Semantic & Surface Tokens
+   * ------------------------------------------------------------------------ */
+  --bg-app: var(--color-alabaster);
+  --bg-surface: var(--color-alabaster-surface);
+  --bg-card: var(--color-alabaster-card);
+  --bg-sidebar: var(--color-dark-emerald);
+  --bg-sidebar-nav-hover: rgba(255, 255, 255, 0.08);
+  --bg-sidebar-nav-active: rgba(122, 160, 90, 0.18);
+  --bg-header: #FFFFFF;
+  --bg-tag-neutral: #EAE6DE;
+  --bg-tag-accent: var(--color-moss-green-subtle);
+
+  /* ------------------------------------------------------------------------
+   * 3. Typography & Text Color Tokens (WCAG AAA/AA Compliant Contrast)
+   * ------------------------------------------------------------------------ */
+  --text-primary: #172B23;            /* Measured Contrast 13.25:1 on Alabaster (WCAG AAA) */
+  --text-secondary: #3D554B;          /* Measured Contrast 7.17:1 on Alabaster (WCAG AAA) */
+  --text-muted: #4E685E;              /* Measured Contrast 5.38:1 on Alabaster (WCAG AA) */
+  --text-inverse-primary: #F4F1EB;    /* Measured Contrast 8.80:1 on Dark Emerald (WCAG AAA) */
+  --text-inverse-secondary: #BFD3CA;  /* Measured Contrast 6.33:1 on Dark Emerald (WCAG AA) */
+  --text-inverse-muted: #B6C8C0;      /* Measured Contrast 5.68:1 on Dark Emerald (WCAG AA) */
+  --text-accent: var(--color-dark-emerald);
+
+  --font-family-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
+
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.8125rem;  /* 13px */
+  --font-size-base: 0.875rem; /* 14px */
+  --font-size-md: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.35;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* ------------------------------------------------------------------------
+   * 4. Spacing Scale (4px baseline)
+   * ------------------------------------------------------------------------ */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* ------------------------------------------------------------------------
+   * 5. Border Radii (Restrained rectangular geometry - strictly no pills)
+   * ------------------------------------------------------------------------ */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* ------------------------------------------------------------------------
+   * 6. Borders & Dividers
+   * ------------------------------------------------------------------------ */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-color-default: var(--color-alabaster-border);
+  --border-color-subtle: var(--color-alabaster-border-subtle);
+  --border-color-dark: var(--color-dark-emerald-border);
+  --border-color-focus: var(--color-moss-green);
+
+  /* ------------------------------------------------------------------------
+   * 7. Restrained Enterprise Shadows
+   * ------------------------------------------------------------------------ */
+  --shadow-subtle: 0 1px 2px rgba(13, 76, 60, 0.04);
+  --shadow-sm: 0 1px 3px rgba(13, 76, 60, 0.06), 0 1px 2px rgba(13, 76, 60, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(13, 76, 60, 0.07), 0 2px 4px -2px rgba(13, 76, 60, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(13, 76, 60, 0.08), 0 4px 6px -4px rgba(13, 76, 60, 0.03);
+
+  /* ------------------------------------------------------------------------
+   * 8. Layout Dimensions & Breakpoints
+   * ------------------------------------------------------------------------ */
+  --sidebar-width-expanded: 260px;
+  --sidebar-width-collapsed: 72px;
+  --header-height: 60px;
+  --content-max-width: 1400px;
+  --z-header: 100;
+  --z-sidebar: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}

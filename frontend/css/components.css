@@ -1,0 +1,909 @@
+/**
+ * ==========================================================================
+ * Crop Recommendation System - Reusable Component Styles
+ * ==========================================================================
+ */
+
+/* --------------------------------------------------------------------------
+ * 1. Buttons (Restrained rectangular geometry, modest corner radius: 4px-6px)
+ * -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--color-dark-emerald);
+  color: var(--text-inverse-primary);
+  border-color: var(--color-dark-emerald);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-dark-emerald-light);
+  border-color: var(--color-dark-emerald-light);
+  color: #FFFFFF;
+}
+
+.btn-secondary {
+  background-color: var(--color-slate-green);
+  color: #FFFFFF;
+  border-color: var(--color-slate-green);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-slate-green-hover);
+  border-color: var(--color-slate-green-hover);
+}
+
+.btn-accent {
+  background-color: var(--color-moss-green);
+  color: #FFFFFF;
+  border-color: var(--color-moss-green);
+}
+
+.btn-accent:hover {
+  background-color: var(--color-moss-green-hover);
+  border-color: var(--color-moss-green-hover);
+}
+
+.btn-outline {
+  background-color: #FFFFFF;
+  color: var(--text-primary);
+  border-color: var(--color-alabaster-border);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-alabaster);
+  border-color: var(--color-slate-green);
+  color: var(--color-dark-emerald);
+}
+
+.btn-sm {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+/* --------------------------------------------------------------------------
+ * 2. Surface Cards & Panels
+ * -------------------------------------------------------------------------- */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  position: relative;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-color-subtle);
+}
+
+.card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.card-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.card-body {
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+ * 3. Status Badges & Chips
+ * -------------------------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-moss {
+  background-color: var(--color-moss-green-light);
+  color: var(--color-moss-green-dark);
+  border: 1px solid rgba(122, 160, 90, 0.3);
+}
+
+.badge-slate {
+  background-color: var(--color-slate-green-subtle);
+  color: var(--color-slate-green);
+  border: 1px solid rgba(45, 90, 74, 0.2);
+}
+
+.badge-dark {
+  background-color: var(--color-dark-emerald);
+  color: var(--text-inverse-primary);
+}
+
+.badge-neutral {
+  background-color: var(--color-alabaster-border-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color-default);
+}
+
+/* --------------------------------------------------------------------------
+ * 4. Page Header Banner
+ * -------------------------------------------------------------------------- */
+.page-header {
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.page-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-description {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  max-width: 800px;
+}
+
+/* --------------------------------------------------------------------------
+ * 5. Structured Placeholder & Foundation Panels (No Fake Data)
+ * -------------------------------------------------------------------------- */
+.foundation-placeholder {
+  border: 1px dashed var(--color-alabaster-border);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.placeholder-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-slate-green-subtle);
+  color: var(--color-slate-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-1);
+}
+
+.placeholder-tag {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-slate-green);
+}
+
+.placeholder-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.placeholder-description {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: var(--line-height-relaxed);
+}
+
+.placeholder-spec-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.spec-item {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color-default);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+ * 6. Specification & Architecture Grid
+ * -------------------------------------------------------------------------- */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.spec-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.spec-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spec-card-icon-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.spec-card-icon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-moss-green-light);
+  color: var(--color-moss-green-dark);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spec-card-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.spec-card-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* --------------------------------------------------------------------------
+ * 7. Callout Block
+ * -------------------------------------------------------------------------- */
+.callout {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--color-slate-green-subtle);
+  border-left: 3px solid var(--color-slate-green);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  margin-bottom: var(--space-6);
+}
+
+.callout-icon {
+  color: var(--color-slate-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.callout-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.callout-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-slate-green);
+}
+
+.callout-body {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* --------------------------------------------------------------------------
+ * 8. Telemetry Metric Summary Cards
+ * -------------------------------------------------------------------------- */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.metric-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.metric-card:hover {
+  border-color: var(--color-slate-green);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metric-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.metric-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.metric-value.unavailable {
+  color: var(--text-muted);
+  font-family: var(--font-family-mono);
+}
+
+.metric-subtext {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+/* --------------------------------------------------------------------------
+ * 9. Dashboard Grid & Section Layouts
+ * -------------------------------------------------------------------------- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.dashboard-full-width {
+  grid-column: 1 / -1;
+}
+
+/* --------------------------------------------------------------------------
+ * 10. Empty State Components (Honest, Actionable, Clean)
+ * -------------------------------------------------------------------------- */
+.empty-state {
+  border: 1px dashed var(--color-alabaster-border);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-slate-green-subtle);
+  color: var(--color-slate-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state-tag {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-slate-green);
+}
+
+.empty-state-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.empty-state-description {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: var(--line-height-relaxed);
+}
+
+.empty-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+ * 11. Parameter & Schema Badge Group
+ * -------------------------------------------------------------------------- */
+.param-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.param-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+}
+
+.param-pill-symbol {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-slate-green);
+  font-family: var(--font-family-mono);
+}
+
+/* --------------------------------------------------------------------------
+ * 12. Prediction Input Form Components
+ * -------------------------------------------------------------------------- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-required-mark {
+  color: #A93226;
+  margin-left: 2px;
+}
+
+.input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.form-input {
+  flex: 1;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  -moz-appearance: textfield;
+}
+
+.input-group .form-input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.input-suffix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  background-color: var(--color-alabaster);
+  border: 1px solid var(--border-color-default);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--color-moss-green);
+  outline-offset: 1px;
+  border-color: var(--color-moss-green);
+}
+
+.form-input.is-invalid {
+  border-color: #A93226 !important;
+  background-color: #FDF7F7;
+}
+
+.form-input.is-invalid:focus-visible {
+  outline-color: #A93226;
+}
+
+.form-help {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.form-error {
+  font-size: var(--font-size-xs);
+  color: #A93226;
+  font-weight: var(--font-weight-medium);
+  margin-top: 2px;
+  display: none;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color-subtle);
+  flex-wrap: wrap;
+}
+
+.form-banner-success {
+  background-color: var(--color-moss-green-subtle);
+  border-left-color: var(--color-moss-green-dark);
+  margin-bottom: var(--space-6);
+}
+
+.form-banner-error {
+  background-color: #FDF2E9;
+  border-left-color: #A93226;
+  margin-bottom: var(--space-6);
+}
+
+.form-banner-warning {
+  background-color: #FAF4E6;
+  border-left-color: var(--color-slate-green);
+  margin-bottom: var(--space-6);
+}
+
+.prediction-result-card {
+  margin-top: var(--space-6);
+}
+
+.result-unavailable-panel {
+  border: 1px dashed var(--color-alabaster-border);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.result-unavailable-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-alabaster-border-subtle);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.result-unavailable-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.result-unavailable-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.result-unavailable-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* --------------------------------------------------------------------------
+ * 13. Data Tables & Schema Visualizer
+ * -------------------------------------------------------------------------- */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  background-color: #FFFFFF;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-size-sm);
+}
+
+.data-table th {
+  background-color: var(--color-alabaster-surface);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color-default);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color-subtle);
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background-color: rgba(244, 241, 235, 0.4);
+}
+
+.code-badge {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  background-color: var(--color-alabaster);
+  border: 1px solid var(--border-color-default);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-xs);
+  color: var(--color-slate-green);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* --------------------------------------------------------------------------
+ * 14. Data Quality Checklist Components
+ * -------------------------------------------------------------------------- */
+.checklist-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color-subtle);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.checklist-item:hover {
+  border-color: var(--border-color-default);
+}
+
+.checklist-left {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.checklist-icon-box {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-color-default);
+  background-color: #FFFFFF;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checklist-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.checklist-description {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+ * 15. Upload Dropzone Component
+ * -------------------------------------------------------------------------- */
+.upload-dropzone {
+  border: 2px dashed var(--color-alabaster-border);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.upload-dropzone:hover {
+  border-color: var(--color-moss-green);
+  background-color: var(--color-moss-green-subtle);
+}
+
+.upload-dropzone.drag-active {
+  border-color: var(--color-moss-green-dark);
+  background-color: var(--color-moss-green-light);
+  box-shadow: 0 0 0 3px rgba(122, 160, 90, 0.2);
+}
+
+.upload-dropzone:focus-visible {
+  outline: 2px solid var(--color-moss-green);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+ * 16. Model Training & Evaluation Components
+ * -------------------------------------------------------------------------- */
+.form-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.form-checkbox-label:hover {
+  border-color: var(--color-moss-green);
+  background-color: var(--color-moss-green-subtle);
+}
+
+.form-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--color-moss-green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.form-checkbox-label input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-checkbox-label.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.benchmark-champion-row {
+  background-color: var(--color-moss-green-subtle) !important;
+  font-weight: var(--font-weight-medium);
+}
+
+.benchmark-champion-row td:first-child {
+  border-left: 3px solid var(--color-moss-green);
+}
+
+.metric-num {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.confusion-cell {
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: var(--space-2) var(--space-3);
+}
+
+.confusion-cell-match {
+  background-color: var(--color-moss-green-light);
+  color: var(--color-dark-emerald);
+  font-weight: 700;
+}
+
+.confusion-cell-error {
+  background-color: #FDF2E9;
+  color: #A93226;
+  font-weight: 600;
+}
+

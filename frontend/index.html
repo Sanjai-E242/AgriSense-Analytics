@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Principles of Data Science - Crop Recommendation System Analytics Shell">
+  <title>Crop Recommendation System | Agricultural Analytics</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans for high-legibility enterprise typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Design System & Layout Styles -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <!-- Accessible Skip Link -->
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <!-- ARIA Live Region for screen reader announcements -->
+  <div id="aria-live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Mobile Drawer Backdrop Overlay -->
+  <div id="mobile-overlay" class="mobile-overlay" aria-hidden="true"></div>
+
+  <div class="app-container">
+    <!-- ====================================================================
+         1. Collapsible Sidebar Navigation (Dark Emerald #0D4C3C)
+         ==================================================================== -->
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Main Navigation">
+      <!-- Sidebar Header / Brand Identity -->
+      <div class="sidebar-header">
+        <div class="brand-icon" aria-hidden="true" data-icon="sprout"></div>
+        <div class="brand-text">
+          <span class="brand-title">AgriSense Analytics</span>
+          <span class="brand-subtitle">PoDS Lab Edition</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav" aria-label="Agricultural Modules">
+        <div class="sidebar-section-label">Core Modules</div>
+        
+        <a href="#dashboard" class="nav-link active" data-view="dashboard" data-title="Dashboard" aria-current="page">
+          <span class="nav-link-icon" data-icon="dashboard" aria-hidden="true"></span>
+          <span class="nav-link-text">Dashboard</span>
+        </a>
+
+        <a href="#prediction" class="nav-link" data-view="prediction" data-title="Crop Prediction">
+          <span class="nav-link-icon" data-icon="sprout" aria-hidden="true"></span>
+          <span class="nav-link-text">Crop Prediction</span>
+        </a>
+
+        <a href="#dataset" class="nav-link" data-view="dataset" data-title="Dataset Explorer">
+          <span class="nav-link-icon" data-icon="database" aria-hidden="true"></span>
+          <span class="nav-link-text">Dataset Explorer</span>
+        </a>
+
+        <div class="sidebar-section-label" style="margin-top: var(--space-3);">Evaluation & Audit</div>
+
+        <a href="#evaluation" class="nav-link" data-view="evaluation" data-title="Model Evaluation">
+          <span class="nav-link-icon" data-icon="evaluation" aria-hidden="true"></span>
+          <span class="nav-link-text">Model Evaluation</span>
+        </a>
+
+        <a href="#history" class="nav-link" data-view="history" data-title="Prediction History">
+          <span class="nav-link-icon" data-icon="history" aria-hidden="true"></span>
+          <span class="nav-link-text">Prediction History</span>
+        </a>
+
+        <a href="#settings" class="nav-link" data-view="settings" data-title="Settings">
+          <span class="nav-link-icon" data-icon="settings" aria-hidden="true"></span>
+          <span class="nav-link-text">Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer with Collapse Trigger -->
+      <div class="sidebar-footer">
+        <button id="sidebar-collapse-btn" class="sidebar-collapse-btn" type="button" aria-expanded="true" aria-controls="app-sidebar" title="Collapse Sidebar">
+          <span data-icon="chevronLeft" aria-hidden="true"></span>
+          <span class="collapse-label">Collapse Sidebar</span>
+        </button>
+        <div class="sidebar-badge">Phase 1 Foundation • v0.1.0</div>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         2. Main Application Wrapper
+         ==================================================================== -->
+    <div class="app-main-wrapper">
+      <!-- Top Navigation Header -->
+      <header class="app-header" role="banner">
+        <div class="header-left">
+          <!-- Mobile Drawer Toggle -->
+          <button id="mobile-menu-toggle" class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="app-sidebar" aria-label="Toggle navigation menu">
+            <span data-icon="menu" aria-hidden="true"></span>
+          </button>
+
+          <!-- Breadcrumbs -->
+          <nav class="header-breadcrumb" aria-label="Breadcrumb">
+            <span class="breadcrumb-root">Principles of Data Science</span>
+            <span class="breadcrumb-separator" aria-hidden="true">/</span>
+            <span id="breadcrumb-current" class="breadcrumb-current">Dashboard</span>
+          </nav>
+        </div>
+
+        <div class="header-right">
+          <!-- Project Status Indicator -->
+          <div class="system-status-indicator" title="Application shell foundation is operational">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>Phase 1 Initialized</span>
+          </div>
+
+          <!-- Academic Calendar Indicator -->
+          <span id="system-time-display" class="badge badge-neutral" style="font-size: 12px; font-weight: 500;"></span>
+        </div>
+      </header>
+
+      <!-- ==================================================================
+           3. Main Content Container
+           ================================================================== -->
+      <main id="main-content" class="app-content" role="main">
+
+        <!-- VIEW PANEL 1: DASHBOARD (Active by default) -->
+        <section data-view-panel="dashboard" class="view-panel" aria-labelledby="heading-dashboard">
+          <header class="page-header">
+            <div class="page-header-top">
+              <div>
+                <h1 id="heading-dashboard" class="page-title">Crop Recommendation Dashboard</h1>
+                <p class="page-description" style="margin-top: var(--space-2);">
+                  A data-driven agricultural decision-support interface for the Principles of Data Science laboratory. Analyzes soil nutrients (Nitrogen, Phosphorus, Potassium), meteorological conditions, and pH levels to determine optimal crop suitability.
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+                <a href="#prediction" class="btn btn-primary" data-navigate-to="prediction" id="btn-dashboard-predict">
+                  <span data-icon="sprout" aria-hidden="true"></span>
+                  <span>Launch Crop Prediction</span>
+                </a>
+              </div>
+            </div>
+          </header>
+
+          <!-- Top Telemetry Metric Summary Cards -->
+          <div class="metric-grid">
+            <div class="metric-card" id="card-dataset-samples">
+              <div class="metric-header">
+                <span class="metric-label">Dataset Samples</span>
+                <span class="badge badge-neutral" id="dash-samples-badge">Unavailable</span>
+              </div>
+              <div class="metric-value-row">
+                <span class="metric-value unavailable" id="dash-samples-value">—</span>
+              </div>
+              <span class="metric-subtext" id="dash-samples-subtext">No training data ingested yet</span>
+            </div>
+
+            <div class="metric-card" id="card-feature-schema">
+              <div class="metric-header">
+                <span class="metric-label">Feature Schema</span>
+                <span class="badge badge-moss" id="dash-schema-badge">7 Variables</span>
+              </div>
+              <div class="metric-value-row">
+                <span class="metric-value" id="dash-schema-value">7</span>
+                <span style="font-size: var(--font-size-xs); color: var(--text-muted);">Parameters</span>
+              </div>
+              <span class="metric-subtext" id="dash-schema-subtext">N, P, K, Temp, Humidity, pH, Rain</span>
+            </div>
+
+            <div class="metric-card" id="card-active-model">
+              <div class="metric-header">
+                <span class="metric-label">Active Model</span>
+                <span class="badge badge-neutral" id="dash-model-badge">Untrained</span>
+              </div>
+              <div class="metric-value-row">
+                <span class="metric-value unavailable" id="dash-model-value">None</span>
+              </div>
+              <span class="metric-subtext" id="dash-model-subtext">Awaiting model training pipeline</span>
+            </div>
+
+            <div class="metric-card" id="card-session-inferences">
+              <div class="metric-header">
+                <span class="metric-label">Session Inferences</span>
+                <span class="badge badge-slate" id="dash-inferences-badge">Idle</span>
+              </div>
+              <div class="metric-value-row">
+                <span class="metric-value" id="dash-inferences-value">0</span>
+                <span style="font-size: var(--font-size-xs); color: var(--text-muted);">Queries</span>
+              </div>
+              <span class="metric-subtext" id="dash-inferences-subtext">No prediction queries logged</span>
+            </div>
+          </div>
+
+          <!-- Main Dashboard Two-Column Grid -->
+          <div class="dashboard-grid">
+            <!-- 1. Dataset Status & Ingestion -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h2 class="card-title">Dataset Status & Repository</h2>
+                  <div class="card-subtitle">Agricultural training data collection status</div>
+                </div>
+                <span class="badge badge-neutral">Pending Ingestion</span>
+              </div>
+              <div class="card-body">
+                <div class="empty-state">
+                  <div class="empty-state-icon" data-icon="database" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Repository Status</span>
+                  <h3 class="empty-state-title">No Dataset Uploaded Yet</h3>
+                  <p class="empty-state-description">
+                    The agricultural feature dataset has not yet been ingested into the system. Uploading the verified dataset file will initialize continuous distributions, class counts, and training splits.
+                  </p>
+                  <div class="empty-state-actions">
+                    <a href="#dataset" class="btn btn-secondary btn-sm" data-navigate-to="dataset">
+                      <span data-icon="database" aria-hidden="true"></span>
+                      <span>Open Dataset Explorer</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Model Performance & Evaluation -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h2 class="card-title">Model Training & Evaluation</h2>
+                  <div class="card-subtitle">Classifier validation and performance benchmarks</div>
+                </div>
+                <span class="badge badge-neutral">Pipeline Inactive</span>
+              </div>
+              <div class="card-body">
+                <div class="empty-state">
+                  <div class="empty-state-icon" data-icon="evaluation" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Validation Benchmark</span>
+                  <h3 class="empty-state-title">No Model Trained Yet</h3>
+                  <p class="empty-state-description">
+                    Machine learning classifiers (Random Forest, Gradient Boosting) have not yet been trained on agricultural data. Validation curves, multiclass confusion matrices, and precision-recall benchmarks will generate once training is triggered.
+                  </p>
+                  <div class="empty-state-actions">
+                    <a href="#evaluation" class="btn btn-outline btn-sm" data-navigate-to="evaluation">
+                      <span data-icon="evaluation" aria-hidden="true"></span>
+                      <span>View Evaluation Specification</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Exploratory Data Analysis (EDA) Workspace -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h2 class="card-title">Exploratory Data Analysis (EDA)</h2>
+                  <div class="card-subtitle">Feature distribution & environmental correlation workspace</div>
+                </div>
+                <span class="badge badge-moss">Workspace Ready</span>
+              </div>
+              <div class="card-body">
+                <div class="empty-state">
+                  <div class="empty-state-icon" data-icon="barChart" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Telemetry Visualizer</span>
+                  <h3 class="empty-state-title">Awaiting Data for Distribution Charts</h3>
+                  <p class="empty-state-description">
+                    Interactive histograms, nutrient correlation heatmaps, and rainfall-to-temperature bivariate plots will render in this workspace once dataset ingestion is complete.
+                  </p>
+                  <div class="param-pill-list" aria-label="Target agricultural input features">
+                    <span class="param-pill"><span class="param-pill-symbol">N</span> Nitrogen</span>
+                    <span class="param-pill"><span class="param-pill-symbol">P</span> Phosphorus</span>
+                    <span class="param-pill"><span class="param-pill-symbol">K</span> Potassium</span>
+                    <span class="param-pill"><span class="param-pill-symbol">°C</span> Temperature</span>
+                    <span class="param-pill"><span class="param-pill-symbol">%</span> Humidity</span>
+                    <span class="param-pill"><span class="param-pill-symbol">pH</span> Soil Acidity</span>
+                    <span class="param-pill"><span class="param-pill-symbol">mm</span> Rainfall</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Recent Predictions Audit Log -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h2 class="card-title">Recent Predictions Audit Log</h2>
+                  <div class="card-subtitle">Session query history and crop recommendations</div>
+                </div>
+                <span class="badge badge-slate">Audit Log</span>
+              </div>
+              <div class="card-body">
+                <div class="empty-state">
+                  <div class="empty-state-icon" data-icon="history" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Session Telemetry</span>
+                  <h3 class="empty-state-title">No Prediction Queries Recorded</h3>
+                  <p class="empty-state-description">
+                    Inferences executed through the Crop Prediction module will be recorded here with timestamped soil parameters, recommended crop species, and classification confidence scores.
+                  </p>
+                  <div class="empty-state-actions">
+                    <a href="#prediction" class="btn btn-secondary btn-sm" data-navigate-to="prediction">
+                      <span data-icon="sprout" aria-hidden="true"></span>
+                      <span>Start First Prediction</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW PANEL 2: CROP PREDICTION -->
+        <section data-view-panel="prediction" class="view-panel" style="display: none;" aria-labelledby="heading-prediction">
+          <header class="page-header">
+            <div class="page-header-top">
+              <div>
+                <h1 id="heading-prediction" class="page-title">Crop Prediction Input Form</h1>
+                <p class="page-description" style="margin-top: var(--space-2);">
+                  Enter the 7 essential agricultural soil chemistry and meteorological measurements. The validation pipeline checks parameter bounds and formats before staging feature vectors for model inference.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <span class="badge badge-moss">7 Parameters</span>
+                <span class="badge badge-slate">Inference Interface</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- Dynamic Form Validation Banner (Populated via JavaScript) -->
+          <div id="form-validation-banner" style="display: none;" role="status"></div>
+
+          <!-- Main Input Form Card -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Agronomic & Environmental Parameters</h2>
+                <div class="card-subtitle">All fields are required and must contain valid numeric measurements</div>
+              </div>
+              <span class="badge badge-neutral">Input Schema Ready</span>
+            </div>
+            <div class="card-body">
+              <form id="crop-prediction-form" novalidate>
+                <div class="form-grid">
+                  <!-- 1. Nitrogen (N) -->
+                  <div class="form-group">
+                    <label for="input-n" class="form-label">
+                      <span>Nitrogen (N)</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-n" 
+                        name="nitrogen" 
+                        class="form-input" 
+                        placeholder="e.g. 90" 
+                        required 
+                        aria-required="true" 
+                        min="0" 
+                        max="500" 
+                        step="1"
+                        aria-describedby="help-n error-n"
+                      >
+                      <span class="input-suffix">mg/kg</span>
+                    </div>
+                    <div class="form-help" id="help-n">Soil Nitrogen content ratio (mg/kg)</div>
+                    <div class="form-error" id="error-n" role="alert" aria-live="polite"></div>
+                  </div>
+
+                  <!-- 2. Phosphorus (P) -->
+                  <div class="form-group">
+                    <label for="input-p" class="form-label">
+                      <span>Phosphorus (P)</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-p" 
+                        name="phosphorus" 
+                        class="form-input" 
+                        placeholder="e.g. 42" 
+                        required 
+                        aria-required="true" 
+                        min="0" 
+                        max="500" 
+                        step="1"
+                        aria-describedby="help-p error-p"
+                      >
+                      <span class="input-suffix">mg/kg</span>
+                    </div>
+                    <div class="form-help" id="help-p">Soil Phosphorus content ratio (mg/kg)</div>
+                    <div class="form-error" id="error-p" role="alert" aria-live="polite"></div>
+                  </div>
+
+                  <!-- 3. Potassium (K) -->
+                  <div class="form-group">
+                    <label for="input-k" class="form-label">
+                      <span>Potassium (K)</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-k" 
+                        name="potassium" 
+                        class="form-input" 
+                        placeholder="e.g. 43" 
+                        required 
+                        aria-required="true" 
+                        min="0" 
+                        max="500" 
+                        step="1"
+                        aria-describedby="help-k error-k"
+                      >
+                      <span class="input-suffix">mg/kg</span>
+                    </div>
+                    <div class="form-help" id="help-k">Soil Potassium content ratio (mg/kg)</div>
+                    <div class="form-error" id="error-k" role="alert" aria-live="polite"></div>
+                  </div>
+
+                  <!-- 4. Temperature (°C) -->
+                  <div class="form-group">
+                    <label for="input-temp" class="form-label">
+                      <span>Temperature</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-temp" 
+                        name="temperature" 
+                        class="form-input" 
+                        placeholder="e.g. 20.8" 
+                        required 
+                        aria-required="true" 
+                        min="-10" 
+                        max="60" 
+                        step="0.1"
+                        aria-describedby="help-temp error-temp"
+                      >
+                      <span class="input-suffix">°C</span>
+                    </div>
+                    <div class="form-help" id="help-temp">Ambient temperature in degrees Celsius</div>
+                    <div class="form-error" id="error-temp" role="alert" aria-live="polite"></div>
+                  </div>
+
+                  <!-- 5. Relative Humidity (%) -->
+                  <div class="form-group">
+                    <label for="input-humidity" class="form-label">
+                      <span>Relative Humidity</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-humidity" 
+                        name="humidity" 
+                        class="form-input" 
+                        placeholder="e.g. 82.0" 
+                        required 
+                        aria-required="true" 
+                        min="0" 
+                        max="100" 
+                        step="0.1"
+                        aria-describedby="help-humidity error-humidity"
+                      >
+                      <span class="input-suffix">%</span>
+                    </div>
+                    <div class="form-help" id="help-humidity">Atmospheric relative humidity percentage</div>
+                    <div class="form-error" id="error-humidity" role="alert" aria-live="polite"></div>
+                  </div>
+
+                  <!-- 6. Soil pH -->
+                  <div class="form-group">
+                    <label for="input-ph" class="form-label">
+                      <span>Soil pH</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-ph" 
+                        name="ph" 
+                        class="form-input" 
+                        placeholder="e.g. 6.50" 
+                        required 
+                        aria-required="true" 
+                        min="0" 
+                        max="14" 
+                        step="0.01"
+                        aria-describedby="help-ph error-ph"
+                      >
+                      <span class="input-suffix">pH</span>
+                    </div>
+                    <div class="form-help" id="help-ph">Soil acidity/alkalinity scale (0.00 - 14.00)</div>
+                    <div class="form-error" id="error-ph" role="alert" aria-live="polite"></div>
+                  </div>
+
+                  <!-- 7. Rainfall (mm) -->
+                  <div class="form-group">
+                    <label for="input-rainfall" class="form-label">
+                      <span>Rainfall</span>
+                      <span class="form-required-mark" title="Required field">*</span>
+                    </label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        id="input-rainfall" 
+                        name="rainfall" 
+                        class="form-input" 
+                        placeholder="e.g. 202.9" 
+                        required 
+                        aria-required="true" 
+                        min="0" 
+                        max="2000" 
+                        step="0.1"
+                        aria-describedby="help-rainfall error-rainfall"
+                      >
+                      <span class="input-suffix">mm</span>
+                    </div>
+                    <div class="form-help" id="help-rainfall">Precipitation volume measured in millimeters</div>
+                    <div class="form-error" id="error-rainfall" role="alert" aria-live="polite"></div>
+                  </div>
+                </div>
+
+                <!-- Form Actions Toolbar -->
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary" id="btn-validate-inputs">
+                    <span data-icon="checkCircle" aria-hidden="true"></span>
+                    <span>Validate Inputs</span>
+                  </button>
+                  <button type="reset" class="btn btn-outline" id="btn-reset-form">
+                    <span data-icon="close" aria-hidden="true"></span>
+                    <span>Reset Form</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Prediction Result Area -->
+          <div class="card prediction-result-card" id="card-prediction-result">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Prediction Inference Output</h2>
+                <div class="card-subtitle">Real-time agricultural model recommendation result</div>
+              </div>
+              <span class="badge badge-neutral" id="prediction-status-badge">Pipeline Inactive</span>
+            </div>
+            <div class="card-body" id="prediction-result-body">
+              <div class="result-unavailable-panel">
+                <div class="result-unavailable-icon" data-icon="alertCircle" aria-hidden="true"></div>
+                <div class="result-unavailable-content">
+                  <div class="result-unavailable-title">
+                    No trained model connected. Complete model training in Model Evaluation before requesting a crop prediction.
+                  </div>
+                  <div class="result-unavailable-text">
+                    The machine learning inference backend requires a trained and approved model pipeline. Navigate to the Model Evaluation tab to fit the champion classifier on the validated agricultural dataset.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW PANEL 3: DATASET EXPLORER & EDA INTERFACE -->
+        <section data-view-panel="dataset" class="view-panel" style="display: none;" aria-labelledby="heading-dataset">
+          <header class="page-header">
+            <div class="page-header-top">
+              <div>
+                <h1 id="heading-dataset" class="page-title">Dataset Explorer & EDA Workspace</h1>
+                <p class="page-description" style="margin-top: var(--space-2);">
+                  Inspect, validate, and explore the agricultural crop recommendation feature distributions, correlation matrices, and data quality validation benchmarks once data ingestion is initialized.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <span class="badge badge-neutral">No Dataset Uploaded</span>
+                <span class="badge badge-slate">Provisional Schema</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- ================================================================
+               SECTION 1: DATASET STATUS & INGESTION PIPELINE
+               ================================================================ -->
+          <div class="card" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Dataset Ingestion & File Upload</h2>
+                <div class="card-subtitle">Manual CSV dataset ingestion and validation pipeline</div>
+              </div>
+              <span class="badge badge-neutral" id="dataset-ingestion-badge">Pending Ingestion</span>
+            </div>
+            <div class="card-body">
+              <div id="dataset-validation-banner" style="display: none; margin-bottom: var(--space-4);" role="status"></div>
+
+              <div id="dataset-status-box">
+                <div class="callout" role="note" style="margin-bottom: var(--space-4);">
+                  <div class="callout-icon" data-icon="info" aria-hidden="true"></div>
+                  <div class="callout-content">
+                    <div class="callout-title">Data Ingestion Protocol</div>
+                    <div class="callout-body">
+                      Select or drop your agricultural CSV dataset below. Expected format is <strong>UTF-8 encoded CSV (.csv)</strong> with up to 15 MB file size. The system validates headers, checks data types, audits missing values and duplicates, and renders live exploratory statistics.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Active Upload Dropzone Area -->
+                <div class="upload-dropzone" id="upload-dropzone" role="button" tabindex="0" aria-label="CSV file upload dropzone. Click or drag and drop a CSV file here.">
+                  <div class="empty-state-icon" data-icon="database" aria-hidden="true"></div>
+                  <span class="empty-state-tag">File Ingestion Pipeline</span>
+                  <h3 class="empty-state-title">Select or Drop CSV Dataset</h3>
+                  <p class="empty-state-description">
+                    Choose a verified crop recommendation CSV file from your local disk. Maximum file size: 15 MB.
+                  </p>
+                  <div style="margin-top: var(--space-3); display: flex; gap: var(--space-3); align-items: center; justify-content: center; flex-wrap: wrap;">
+                    <label for="csv-file-input" class="btn btn-primary btn-sm" style="cursor: pointer; margin: 0;">
+                      <span data-icon="fileText" aria-hidden="true"></span>
+                      <span>Browse CSV File</span>
+                    </label>
+                    <input 
+                      type="file" 
+                      id="csv-file-input" 
+                      accept=".csv,text/csv" 
+                      style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;"
+                      aria-label="Upload CSV dataset file"
+                    >
+                    <span style="font-size: var(--font-size-xs); color: var(--text-secondary);">Supported: .csv (UTF-8, max 15MB)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               SECTION 2: EXPECTED SCHEMA SPECIFICATION
+               ================================================================ -->
+          <div class="card" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Expected Feature Schema & Role Definitions</h2>
+                <div class="card-subtitle">Provisional 8-column agricultural crop recommendation specification</div>
+              </div>
+              <span class="badge badge-moss">8 Columns Defined</span>
+            </div>
+            <div class="card-body">
+              <div class="callout" role="note" style="margin-bottom: var(--space-4);">
+                <div class="callout-icon" data-icon="info" aria-hidden="true"></div>
+                <div class="callout-content">
+                  <div class="callout-title">Provisional Schema Notice</div>
+                  <div class="callout-body">
+                    This specification documents expected feature roles based on standard agricultural crop recommendation benchmarks. Final column naming conventions, physical units, and required features will be validated against the active dataset file upon ingestion.
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="data-table" aria-label="Expected Dataset Schema">
+                  <thead>
+                    <tr>
+                      <th scope="col">Column Name</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Expected Data Type</th>
+                      <th scope="col">Physical Unit</th>
+                      <th scope="col">Agronomic Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="code-badge">N</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float/Int)</td>
+                      <td><code>mg/kg</code></td>
+                      <td>Ratio of Nitrogen content in soil</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">P</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float/Int)</td>
+                      <td><code>mg/kg</code></td>
+                      <td>Ratio of Phosphorus content in soil</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">K</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float/Int)</td>
+                      <td><code>mg/kg</code></td>
+                      <td>Ratio of Potassium content in soil</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">temperature</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float)</td>
+                      <td><code>°C</code></td>
+                      <td>Ambient air temperature in degrees Celsius</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">humidity</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float)</td>
+                      <td><code>%</code></td>
+                      <td>Relative atmospheric humidity percentage</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">ph</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float)</td>
+                      <td><code>pH</code></td>
+                      <td>Soil acidity/alkalinity measurement (0.00 – 14.00)</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">rainfall</span></td>
+                      <td><span class="badge badge-moss">Feature (Input)</span></td>
+                      <td>Continuous Numeric (Float)</td>
+                      <td><code>mm</code></td>
+                      <td>Precipitation depth in millimeters</td>
+                    </tr>
+                    <tr>
+                      <td><span class="code-badge">label</span></td>
+                      <td><span class="badge badge-slate">Target (Output)</span></td>
+                      <td>Categorical (String)</td>
+                      <td><code>N/A</code></td>
+                      <td>Target crop species classification (e.g. rice, maize, etc.)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               SECTION 3: EXPLORATORY DATA ANALYSIS (EDA) WORKSPACE
+               ================================================================ -->
+          <div class="card" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Exploratory Data Analysis (EDA) Workspace</h2>
+                <div class="card-subtitle">Real-time exploratory distributions, correlation matrix, and summary statistics</div>
+              </div>
+              <span class="badge badge-neutral">Awaiting Data Ingestion</span>
+            </div>
+            <div class="card-body">
+              <div class="dashboard-grid">
+                <!-- 1. Dataset Dimensions & Data Types -->
+                <div class="empty-state" id="eda-dimensions-card">
+                  <div class="empty-state-icon" data-icon="table" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Dimensions & Types</span>
+                  <h3 class="empty-state-title">Dimensions Uncalculated</h3>
+                  <p class="empty-state-description">
+                    Total row count (0 samples), column count (0 features), and inferred memory types will calculate upon CSV file ingestion.
+                  </p>
+                </div>
+
+                <!-- 2. Missing-Value Summary -->
+                <div class="empty-state" id="eda-missing-card">
+                  <div class="empty-state-icon" data-icon="alertCircle" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Data Completeness</span>
+                  <h3 class="empty-state-title">Missing Value Scan Inactive</h3>
+                  <p class="empty-state-description">
+                    Per-column null counts, NaN frequencies, and sparsity percentages will be computed across all features upon upload.
+                  </p>
+                </div>
+
+                <!-- 3. Duplicate-Row Summary -->
+                <div class="empty-state" id="eda-duplicates-card">
+                  <div class="empty-state-icon" data-icon="fileText" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Duplicate Detection</span>
+                  <h3 class="empty-state-title">Duplicate Record Scan Inactive</h3>
+                  <p class="empty-state-description">
+                    Automated scan for duplicate agricultural observation vectors and identical sample rows will execute upon ingestion.
+                  </p>
+                </div>
+
+                <!-- 4. Crop-Class Distribution -->
+                <div class="empty-state" id="eda-class-card">
+                  <div class="empty-state-icon" data-icon="sprout" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Class Balance</span>
+                  <h3 class="empty-state-title">Target Class Distribution Unavailable</h3>
+                  <p class="empty-state-description">
+                    Crop species frequency breakdowns, class balance ratios, and sample representation charts will render once the target column is parsed.
+                  </p>
+                </div>
+
+                <!-- 5. Feature Distributions -->
+                <div class="empty-state" id="eda-distributions-card">
+                  <div class="empty-state-icon" data-icon="barChart" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Univariate Distributions</span>
+                  <h3 class="empty-state-title">Feature Distribution Charts Inactive</h3>
+                  <p class="empty-state-description">
+                    Interactive continuous histograms, kernel density estimates, and outlier box plots for N, P, K, temperature, humidity, pH, and rainfall will render here.
+                  </p>
+                </div>
+
+                <!-- 6. Feature Correlation Heatmap -->
+                <div class="empty-state" id="eda-correlation-card">
+                  <div class="empty-state-icon" data-icon="layers" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Correlation Analysis</span>
+                  <h3 class="empty-state-title">Pearson Correlation Matrix Inactive</h3>
+                  <p class="empty-state-description">
+                    Pairwise linear correlation coefficients and multicollinearity heatmaps across all continuous features will render upon dataset ingestion.
+                  </p>
+                </div>
+
+                <!-- 7. Feature Summary Statistics (Full Width in Grid) -->
+                <div class="empty-state dashboard-full-width" id="eda-summary-table-card">
+                  <div class="empty-state-icon" data-icon="code" aria-hidden="true"></div>
+                  <span class="empty-state-tag">Statistical Summary Table</span>
+                  <h3 class="empty-state-title">Feature Summary Statistics Table Inactive</h3>
+                  <p class="empty-state-description">
+                    Full parametric summary table (Count, Mean, Standard Deviation, Minimum, 25th Percentile, Median, 75th Percentile, Maximum) will populate across all 7 features upon dataset ingestion.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               SECTION 4: DATA QUALITY & VALIDATION CHECKLIST
+               ================================================================ -->
+          <div class="card" id="data-quality-checklist-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Pre-Modeling Data Quality & Ingestion Checklist</h2>
+                <div class="card-subtitle">Automated verification criteria executed prior to model training pipeline</div>
+              </div>
+              <span class="badge badge-neutral">0 / 6 Verified</span>
+            </div>
+            <div class="card-body">
+              <div class="checklist-list" role="list">
+                <div class="checklist-item" role="listitem">
+                  <div class="checklist-left">
+                    <div class="checklist-icon-box" data-icon="square" aria-hidden="true"></div>
+                    <div>
+                      <div class="checklist-title">1. Required Schema Columns Present</div>
+                      <div class="checklist-description">Verify that all 8 required columns (N, P, K, temperature, humidity, ph, rainfall, label) exist in the CSV header.</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-neutral">Pending Ingestion</span>
+                </div>
+
+                <div class="checklist-item" role="listitem">
+                  <div class="checklist-left">
+                    <div class="checklist-icon-box" data-icon="square" aria-hidden="true"></div>
+                    <div>
+                      <div class="checklist-title">2. Numeric Feature Types Valid</div>
+                      <div class="checklist-description">Confirm that all 7 agronomic inputs contain strictly numeric values without string corruption.</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-neutral">Unverified</span>
+                </div>
+
+                <div class="checklist-item" role="listitem">
+                  <div class="checklist-left">
+                    <div class="checklist-icon-box" data-icon="square" aria-hidden="true"></div>
+                    <div>
+                      <div class="checklist-title">3. Missing & Null Values Audited</div>
+                      <div class="checklist-description">Scan the entire dataset for null, NaN, or whitespace entries across all feature rows.</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-neutral">Unverified</span>
+                </div>
+
+                <div class="checklist-item" role="listitem">
+                  <div class="checklist-left">
+                    <div class="checklist-icon-box" data-icon="square" aria-hidden="true"></div>
+                    <div>
+                      <div class="checklist-title">4. Duplicate Records Checked</div>
+                      <div class="checklist-description">Scan for identical feature vector duplicates and evaluate potential data leakage risks.</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-neutral">Unverified</span>
+                </div>
+
+                <div class="checklist-item" role="listitem">
+                  <div class="checklist-left">
+                    <div class="checklist-icon-box" data-icon="square" aria-hidden="true"></div>
+                    <div>
+                      <div class="checklist-title">5. Target Crop Labels Inspected</div>
+                      <div class="checklist-description">Verify categorical string formatting, class balance, and label consistency of target crop species.</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-neutral">Unverified</span>
+                </div>
+
+                <div class="checklist-item" role="listitem">
+                  <div class="checklist-left">
+                    <div class="checklist-icon-box" data-icon="square" aria-hidden="true"></div>
+                    <div>
+                      <div class="checklist-title">6. Physical Units & Feature Ranges Reviewed</div>
+                      <div class="checklist-description">Ensure measurements conform to physically valid agricultural thresholds (pH: 0-14, Humidity: 0-100%, Non-negative NPK/Rainfall).</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-neutral">Unverified</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW PANEL 4: MODEL EVALUATION -->
+        <section data-view-panel="evaluation" class="view-panel" style="display: none;" aria-labelledby="heading-evaluation">
+          <header class="page-header">
+            <div class="page-header-top">
+              <div>
+                <h1 id="heading-evaluation" class="page-title">Model Training & Comparative Evaluation</h1>
+                <p class="page-description" style="margin-top: var(--space-2);">
+                  Reproducible multi-classifier evaluation across Decision Tree, Random Forest, and K-Nearest Neighbors. Preprocessing pipelines eliminate data leakage, select the champion model strictly via stratified cross-validation Macro-F1 on the training partition, and report final evaluation on an untouched held-out test split.
+                </p>
+              </div>
+              <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <span class="badge badge-neutral" id="model-pipeline-badge">Pipeline Inactive</span>
+                <span class="badge badge-slate">Seed: 42</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- Training Status Banner (Populated via JS) -->
+          <div id="training-status-banner" style="display: none; margin-bottom: var(--space-4);" role="status"></div>
+
+          <!-- Section 1: Dataset Training Authorization & Execution -->
+          <div class="card" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Dataset Training Authorization & Execution</h2>
+                <div class="card-subtitle">Project owner confirmation required prior to model fitting</div>
+              </div>
+              <span class="badge badge-slate">Safety Protocol</span>
+            </div>
+            <div class="card-body">
+              <div id="training-dataset-info">
+                <div class="callout" role="note" style="margin-bottom: var(--space-4);">
+                  <div class="callout-icon" data-icon="info" aria-hidden="true"></div>
+                  <div class="callout-content">
+                    <div class="callout-title">No Active Dataset Ingested</div>
+                    <div class="callout-body">
+                      Please navigate to the <a href="#dataset" style="color: var(--color-slate-green); font-weight: 600; text-decoration: underline;" data-navigate-to="dataset">Dataset Explorer</a> and upload the verified agricultural CSV dataset before initiating model training.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-4);">
+                <label class="form-checkbox-label disabled" for="chk-confirm-training">
+                  <input type="checkbox" id="chk-confirm-training" disabled>
+                  <span>
+                    <strong>Project Owner Confirmation:</strong> I confirm that this is the verified agricultural crop dataset approved for model training. I authorize the reproducible classification pipeline to execute.
+                  </span>
+                </label>
+
+                <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+                  <button type="button" class="btn btn-primary" id="btn-start-training" disabled>
+                    <span data-icon="evaluation" aria-hidden="true"></span>
+                    <span>Train Classification Models</span>
+                  </button>
+                  <span id="training-spinner-text" style="display: none; font-size: var(--font-size-sm); color: var(--color-slate-green); font-weight: 500;">
+                    Training Decision Tree, Random Forest, and KNN pipelines...
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Comparative Classifier Benchmark Table -->
+          <div class="card" id="model-benchmark-container" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Comparative Classifier Benchmark Table</h2>
+                <div class="card-subtitle">Empirical performance across 80% train / 20% held-out test splits</div>
+              </div>
+              <span class="badge badge-neutral">Awaiting Training</span>
+            </div>
+            <div class="card-body">
+              <div class="empty-state">
+                <div class="empty-state-icon" data-icon="evaluation" aria-hidden="true"></div>
+                <span class="empty-state-tag">Benchmark Specification</span>
+                <h3 class="empty-state-title">No Models Trained Yet</h3>
+                <p class="empty-state-description">
+                  Empirical classification results for Decision Tree, Random Forest, and K-Nearest Neighbors will populate here once training is authorized. In-sample training accuracy is strictly separated from held-out test evaluation to audit overfitting.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Champion Model Deep-Dive & Per-Class Metrics -->
+          <div class="card" id="champion-deepdive-container" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Champion Model Deep-Dive</h2>
+                <div class="card-subtitle">Per-class precision, recall, and F1-score breakdowns on held-out test data</div>
+              </div>
+              <span class="badge badge-neutral">Specification Ready</span>
+            </div>
+            <div class="card-body">
+              <div class="empty-state">
+                <div class="empty-state-icon" data-icon="sprout" aria-hidden="true"></div>
+                <span class="empty-state-tag">Per-Class Telemetry</span>
+                <h3 class="empty-state-title">Per-Class Metrics Pending</h3>
+                <p class="empty-state-description">
+                  Individual crop species precision, recall, and F1-score breakdowns will render here after the multi-classifier benchmark identifies the winning model.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Multiclass Confusion Matrix Visualizer -->
+          <div class="card" id="confusion-matrix-container" style="margin-bottom: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Multiclass Confusion Matrix Visualizer</h2>
+                <div class="card-subtitle">True Species vs Predicted Species on Held-Out Test Set</div>
+              </div>
+              <span class="badge badge-neutral">Matrix Inactive</span>
+            </div>
+            <div class="card-body">
+              <div class="empty-state">
+                <div class="empty-state-icon" data-icon="layers" aria-hidden="true"></div>
+                <span class="empty-state-tag">Held-Out Predictions</span>
+                <h3 class="empty-state-title">Confusion Matrix Inactive</h3>
+                <p class="empty-state-description">
+                  Pairwise misclassification analysis and diagonal true-positive frequencies across all target crop classes will render upon pipeline completion.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5: Statistical Reliability & Sample Limitations (Hidden when empty) -->
+          <div class="card" id="model-warnings-container" style="display: none; margin-bottom: var(--space-6);"></div>
+
+          <!-- Section 6: Model Serialization & Schema Storage -->
+          <div class="card" id="model-storage-container">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Model Serialization & Schema Storage</h2>
+                <div class="card-subtitle">Safe local pipeline artifact and inference integration metadata</div>
+              </div>
+              <span class="badge badge-neutral">Artifact Pending</span>
+            </div>
+            <div class="card-body">
+              <div class="empty-state">
+                <div class="empty-state-icon" data-icon="database" aria-hidden="true"></div>
+                <span class="empty-state-tag">Storage Architecture</span>
+                <h3 class="empty-state-title">No Model Artifact Stored Yet</h3>
+                <p class="empty-state-description">
+                  Following training, the champion pipeline (StandardScaler + Estimator) is serialized to <code>models/best_crop_model.json</code> with feature schema metadata saved to <code>models/model_metadata.json</code> for safe local inference.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW PANEL 5: PREDICTION HISTORY -->
+        <section data-view-panel="history" class="view-panel" style="display: none;" aria-labelledby="heading-history">
+          <header class="page-header">
+            <div class="page-header-top">
+              <h1 id="heading-history" class="page-title">Prediction History & Logs</h1>
+              <span id="history-header-badge" class="badge badge-slate">Inference Audit Trail</span>
+            </div>
+            <p class="page-description">
+              Audit log of past environmental queries and corresponding crop recommendations generated by the production model pipeline.
+            </p>
+          </header>
+
+          <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-3);">
+              <div class="card-title-group">
+                <h2 class="card-title">Recorded Inference Sessions</h2>
+                <div class="card-subtitle">Local SQLite audit trail (data/prediction_history.db)</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-3);">
+                <span id="history-count-badge" class="badge badge-neutral">0 Inferences Logged</span>
+                <button id="btn-clear-history" class="btn btn-secondary btn-sm" type="button" style="display: none;">
+                  <span data-icon="trash" aria-hidden="true"></span>
+                  <span>Clear History</span>
+                </button>
+              </div>
+            </div>
+            <div class="card-body" id="history-content-container">
+              <div class="empty-state">
+                <div class="empty-state-icon" data-icon="history" aria-hidden="true"></div>
+                <span class="empty-state-tag">Audit Trail</span>
+                <h3 class="empty-state-title">No Predictions Recorded Yet</h3>
+                <p class="empty-state-description">
+                  Queries executed through the Crop Prediction module will be automatically logged here with exact input vectors, timestamps, model identifiers, and dataset fingerprints.
+                </p>
+                <div style="margin-top: var(--space-4);">
+                  <button class="btn btn-primary btn-sm" type="button" data-navigate-to="prediction">
+                    <span data-icon="sprout" aria-hidden="true"></span>
+                    <span>Go to Crop Prediction</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW PANEL 6: SETTINGS -->
+        <section data-view-panel="settings" class="view-panel" style="display: none;" aria-labelledby="heading-settings">
+          <header class="page-header">
+            <div class="page-header-top">
+              <h1 id="heading-settings" class="page-title">System Settings & Preferences</h1>
+              <span class="badge badge-slate">Preferences</span>
+            </div>
+            <p class="page-description">
+              Configure system display preferences, accessibility options, and lab runtime parameters.
+            </p>
+          </header>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Accessibility & Motion Preferences</h2>
+                <div class="card-subtitle">User experience and ergonomics configurations</div>
+              </div>
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; gap: var(--space-4);">
+              <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer; color: var(--text-primary);">
+                <input type="checkbox" id="toggle-reduced-motion" style="width: 18px; height: 18px; accent-color: var(--color-moss-green);">
+                <span>
+                  <strong>Force Reduced Motion:</strong> Suppress micro-transitions and UI animations across the entire application interface.
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Color Token Verification Card -->
+          <div class="card" style="margin-top: var(--space-6);">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Design System Palette & Contrast Verification</h2>
+                <div class="card-subtitle">Verified color tokens and measured WCAG contrast ratios</div>
+              </div>
+              <span class="badge badge-moss">4 Tokens Active</span>
+            </div>
+            <div class="card-body">
+              <div class="spec-grid" style="margin-top: 0;">
+                <div class="spec-card">
+                  <div style="height: 48px; background-color: #F4F1EB; border: 1px solid var(--color-alabaster-border); border-radius: var(--radius-sm); margin-bottom: var(--space-2);"></div>
+                  <div class="spec-card-title">Alabaster</div>
+                  <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--text-secondary);">#F4F1EB</div>
+                  <div class="spec-card-text">Base application background and light card surface palette.</div>
+                </div>
+
+                <div class="spec-card">
+                  <div style="height: 48px; background-color: #7AA05A; border-radius: var(--radius-sm); margin-bottom: var(--space-2);"></div>
+                  <div class="spec-card-title">Moss Green</div>
+                  <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--text-secondary);">#7AA05A</div>
+                  <div class="spec-card-text">Primary accent, focus ring indicators, and active markers.</div>
+                </div>
+
+                <div class="spec-card">
+                  <div style="height: 48px; background-color: #2D5A4A; border-radius: var(--radius-sm); margin-bottom: var(--space-2);"></div>
+                  <div class="spec-card-title">Slate Green</div>
+                  <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--text-secondary);">#2D5A4A</div>
+                  <div class="spec-card-text">Secondary surface headers, callouts, and section tags.</div>
+                </div>
+
+                <div class="spec-card">
+                  <div style="height: 48px; background-color: #0D4C3C; border-radius: var(--radius-sm); margin-bottom: var(--space-2);"></div>
+                  <div class="spec-card-title">Dark Emerald</div>
+                  <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--text-secondary);">#0D4C3C</div>
+                  <div class="spec-card-text">Primary navigation sidebar, brand anchors, and container depths.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ==================================================================
+           4. Application Footer
+           ================================================================== -->
+      <footer class="app-footer" role="contentinfo">
+        <div>
+          <span>Principles of Data Science (PoDS) • Agricultural Analytics Laboratory</span>
+        </div>
+        <div>
+          <span>Phase 1 Design Foundation Active</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/icons.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/prediction-form.js"></script>
+  <script src="js/dataset-parser.js"></script>
+  <script src="js/model-evaluation.js"></script>
+  <script src="js/prediction-history.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

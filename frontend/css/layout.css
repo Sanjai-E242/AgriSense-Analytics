@@ -1,0 +1,372 @@
+/**
+ * ==========================================================================
+ * Crop Recommendation System - Application Shell Layout
+ * ==========================================================================
+ */
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-app);
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+ * 1. Sidebar Navigation (Dark Emerald #0D4C3C)
+ * -------------------------------------------------------------------------- */
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width-expanded);
+  background-color: var(--bg-sidebar);
+  color: var(--text-inverse-primary);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-sidebar);
+  border-right: 1px solid var(--border-color-dark);
+  transition: width var(--transition-normal);
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* Collapsed State */
+.app-sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+.sidebar-header {
+  height: var(--header-height);
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--border-color-dark);
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  background-color: rgba(122, 160, 90, 0.16);
+  border: 1px solid rgba(122, 160, 90, 0.35);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-moss-green);
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.app-sidebar.collapsed .brand-text {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+}
+
+.brand-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-inverse-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--text-inverse-muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Sidebar Navigation Items */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-3);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar-section-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-inverse-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  white-space: nowrap;
+  transition: opacity var(--transition-fast);
+}
+
+.app-sidebar.collapsed .sidebar-section-label {
+  opacity: 0;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-inverse-secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  position: relative;
+  min-height: 40px;
+}
+
+.nav-link:hover {
+  background-color: var(--bg-sidebar-nav-hover);
+  color: var(--text-inverse-primary);
+}
+
+.nav-link.active {
+  background-color: var(--bg-sidebar-nav-active);
+  color: #FFFFFF;
+  font-weight: var(--font-weight-semibold);
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background-color: var(--color-moss-green);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+
+.nav-link-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-link-text {
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+  flex: 1;
+}
+
+.app-sidebar.collapsed .nav-link-text {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-color-dark);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  background-color: var(--color-dark-emerald-darker);
+}
+
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-inverse-secondary);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-collapse-btn:hover {
+  background-color: var(--bg-sidebar-nav-hover);
+  color: var(--text-inverse-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-badge {
+  font-size: 11px;
+  color: var(--text-inverse-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.app-sidebar.collapsed .sidebar-badge {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+ * 2. Main Content Area & Layout Wrapper
+ * -------------------------------------------------------------------------- */
+.app-main-wrapper {
+  margin-left: var(--sidebar-width-expanded);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  transition: margin-left var(--transition-normal);
+  background-color: var(--bg-app);
+}
+
+.app-sidebar.collapsed ~ .app-main-wrapper {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+/* --------------------------------------------------------------------------
+ * 3. Top Navigation Header
+ * -------------------------------------------------------------------------- */
+.app-header {
+  height: var(--header-height);
+  flex-shrink: 0;
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border-color-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  box-shadow: var(--shadow-subtle);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  cursor: pointer;
+  color: var(--text-primary);
+  align-items: center;
+  justify-content: center;
+}
+
+.header-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb-root {
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.breadcrumb-separator {
+  color: var(--color-alabaster-border);
+}
+
+.breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.system-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-alabaster);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-moss-green);
+  display: inline-block;
+}
+
+/* --------------------------------------------------------------------------
+ * 4. Main Content Container
+ * -------------------------------------------------------------------------- */
+.app-content {
+  flex: 1;
+  padding: var(--space-6) var(--space-8);
+  max-width: var(--content-max-width);
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+ * 5. Footer Area
+ * -------------------------------------------------------------------------- */
+.app-footer {
+  padding: var(--space-4) var(--space-8);
+  border-top: 1px solid var(--border-color-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --------------------------------------------------------------------------
+ * 6. Mobile Drawer Overlay
+ * -------------------------------------------------------------------------- */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(13, 76, 60, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: calc(var(--z-sidebar) - 1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}

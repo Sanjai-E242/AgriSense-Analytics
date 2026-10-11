@@ -1,0 +1,149 @@
+/**
+ * ==========================================================================
+ * Crop Recommendation System - Base Styles & Typography
+ * ==========================================================================
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + var(--space-4));
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+ * Accessible Focus Ring (Moss Green)
+ * -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--color-moss-green);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Skip link for keyboard accessibility */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  background: var(--color-dark-emerald);
+  color: var(--text-inverse-primary);
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  z-index: 1000;
+  transition: top var(--transition-fast);
+  text-decoration: none;
+}
+
+.skip-to-content:focus {
+  top: var(--space-3);
+}
+
+/* --------------------------------------------------------------------------
+ * Typography Hierarchy
+ * -------------------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  letter-spacing: -0.015em;
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: var(--font-size-xl);
+}
+
+h3 {
+  font-size: var(--font-size-lg);
+}
+
+h4 {
+  font-size: var(--font-size-md);
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+a {
+  color: var(--color-slate-green);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-dark-emerald);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+}
+
+/* --------------------------------------------------------------------------
+ * Screen reader only utility
+ * -------------------------------------------------------------------------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+ * Respect Reduced Motion (System Preference & Explicit In-App Toggle)
+ * -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.force-reduced-motion *,
+.force-reduced-motion *::before,
+.force-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
