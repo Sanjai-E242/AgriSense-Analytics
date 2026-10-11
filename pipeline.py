@@ -162,8 +162,8 @@ class DecisionTreeNode:
         return self.value is not None
 
 class DecisionTreeModel:
-    """CART Decision Tree Classifier with Gini Impurity."""
-    def __init__(self, max_depth: int = 10, min_samples_split: int = 4, random_state: int = 42):
+    """CART Decision Tree Classifier with bounded recursion, fast Gini split, and memory efficiency."""
+    def __init__(self, max_depth: int = 8, min_samples_split: int = 4, random_state: int = 42):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.random_state = random_state
@@ -181,58 +181,67 @@ class DecisionTreeModel:
         return 1.0 - float(np.sum(probs ** 2))
 
     def _best_split(self, X: np.ndarray, y: np.ndarray, feat_subset: Optional[List[int]] = None):
-        best_gain = -1.0
+        n_samples, n_features = X.shape
+        if n_samples < self.min_samples_split:
+            return None, None
+
+        is_int = np.issubdtype(y.dtype, np.integer)
+        if is_int:
+            cnts = np.bincount(y)
+            if np.count_nonzero(cnts) <= 1:
+                return None, None
+            n_classes = len(cnts)
+            sum_all_sq = float(np.dot(cnts, cnts))
+            base_score = sum_all_sq / n_samples
+        else:
+            unique, counts = np.unique(y, return_counts=True)
+            if len(unique) <= 1:
+                return None, None
+            base_score = float(np.sum(counts ** 2)) / n_samples
+
+        best_score = base_score
         best_feat = None
         best_thresh = None
 
-        n_samples, n_features = X.shape
         features = feat_subset if feat_subset is not None else list(range(n_features))
-        is_int = np.issubdtype(y.dtype, np.integer)
-
-        if is_int:
-            cnts = np.bincount(y)
-            n_classes = len(cnts)
-            curr_p = cnts[cnts > 0] / n_samples
-            current_gini = 1.0 - float(np.sum(curr_p ** 2))
-        else:
-            current_gini = self._gini(y)
-
-        if current_gini <= 0.0:
-            return None, None
 
         for feat in features:
             col = X[:, feat]
+            col_min, col_max = np.min(col), np.max(col)
+            if col_min == col_max:
+                continue
+
             thresholds = np.unique(col)
-            if len(thresholds) > 20:
-                thresholds = np.percentile(col, np.linspace(5, 95, 19))
+            if len(thresholds) > 16:
+                thresholds = np.percentile(col, np.linspace(10, 90, 10))
 
             for thresh in thresholds:
                 left_mask = col <= thresh
-                n_left = int(np.sum(left_mask))
-                if n_left == 0 or n_left == n_samples:
-                    continue
+                n_left = int(np.count_nonzero(left_mask))
                 n_right = n_samples - n_left
+                if n_left == 0 or n_right == 0:
+                    continue
 
                 if is_int:
                     left_cnts = np.bincount(y[left_mask], minlength=n_classes)
                     right_cnts = cnts - left_cnts
-                    lp = left_cnts[left_cnts > 0] / n_left
-                    left_gini = 1.0 - float(np.sum(lp ** 2))
-                    rp = right_cnts[right_cnts > 0] / n_right
-                    right_gini = 1.0 - float(np.sum(rp ** 2))
+                    sum_L_sq = float(np.dot(left_cnts, left_cnts))
+                    sum_R_sq = float(np.dot(right_cnts, right_cnts))
                 else:
-                    left_gini = self._gini(y[left_mask])
-                    right_gini = self._gini(y[~left_mask])
+                    _, l_counts = np.unique(y[left_mask], return_counts=True)
+                    _, r_counts = np.unique(y[~left_mask], return_counts=True)
+                    sum_L_sq = float(np.sum(l_counts ** 2))
+                    sum_R_sq = float(np.sum(r_counts ** 2))
 
-                p_left = n_left / n_samples
-                p_right = 1.0 - p_left
-                weighted_gini = p_left * left_gini + p_right * right_gini
-                gain = current_gini - weighted_gini
-
-                if gain > best_gain:
-                    best_gain = gain
+                score = (sum_L_sq / n_left) + (sum_R_sq / n_right)
+                if score > best_score:
+                    best_score = score
                     best_feat = feat
                     best_thresh = thresh
+
+        best_gain = (best_score - base_score) / n_samples
+        if best_gain <= 1e-7 or best_feat is None:
+            return None, None
 
         return best_feat, best_thresh
 
@@ -246,7 +255,7 @@ class DecisionTreeModel:
                 return DecisionTreeNode(value=str(leaf_val))
         else:
             unique_classes, counts = np.unique(y, return_counts=True)
-            if len(unique_classes) == 1 or depth >= self.max_depth or n_samples < self.min_samples_split:
+            if len(unique_classes) <= 1 or depth >= self.max_depth or n_samples < self.min_samples_split:
                 leaf_val = unique_classes[np.argmax(counts)]
                 return DecisionTreeNode(value=str(leaf_val))
 
@@ -257,14 +266,18 @@ class DecisionTreeModel:
 
         best_feat, best_thresh = self._best_split(X, y, feat_subset)
         if best_feat is None:
-            if classes is not None and np.issubdtype(y.dtype, np.integer):
-                leaf_val = classes[np.argmax(cnts)]
-            else:
-                leaf_val = unique_classes[np.argmax(counts)]
+            leaf_val = classes[np.argmax(cnts)] if (classes is not None and np.issubdtype(y.dtype, np.integer)) else unique_classes[np.argmax(counts)]
             return DecisionTreeNode(value=str(leaf_val))
 
         left_mask = X[:, best_feat] <= best_thresh
         right_mask = ~left_mask
+        n_left = int(np.count_nonzero(left_mask))
+        n_right = n_samples - n_left
+
+        # Bounded safeguard: prevent degenerate or empty splits from recurring
+        if n_left == 0 or n_right == 0:
+            leaf_val = classes[np.argmax(cnts)] if (classes is not None and np.issubdtype(y.dtype, np.integer)) else unique_classes[np.argmax(counts)]
+            return DecisionTreeNode(value=str(leaf_val))
 
         left_child = self._build_tree(X[left_mask], y[left_mask], depth + 1, feat_subset_size, classes)
         right_child = self._build_tree(X[right_mask], y[right_mask], depth + 1, feat_subset_size, classes)
@@ -327,7 +340,7 @@ class DecisionTreeModel:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         tree = cls(
-            max_depth=data.get("max_depth", 10),
+            max_depth=data.get("max_depth", 8),
             min_samples_split=data.get("min_samples_split", 4),
             random_state=data.get("random_state", 42)
         )
@@ -339,8 +352,13 @@ class DecisionTreeModel:
 # 4. CLASSIFIER 3: RANDOM FOREST CLASSIFIER
 # ==============================================================================
 class RandomForestModel:
-    """Random Forest Classifier with Bootstrap Aggregation & Feature Subsampling."""
-    def __init__(self, n_estimators: int = 25, max_depth: int = 10, min_samples_split: int = 3, random_state: int = 42):
+    """
+    Random Forest Classifier with Bootstrap Aggregation & Feature Subsampling.
+    Configured with resource-bounded defaults (12 estimators, max_depth 8) to
+    prevent high memory churn and avoid SIGKILL OOM events on resource-constrained
+    environments (such as Render free instances with 512MB RAM and 0.1 vCPU).
+    """
+    def __init__(self, n_estimators: int = 12, max_depth: int = 8, min_samples_split: int = 4, random_state: int = 42):
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -393,9 +411,9 @@ class RandomForestModel:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         rf = cls(
-            n_estimators=data.get("n_estimators", 25),
-            max_depth=data.get("max_depth", 10),
-            min_samples_split=data.get("min_samples_split", 3),
+            n_estimators=data.get("n_estimators", 12),
+            max_depth=data.get("max_depth", 8),
+            min_samples_split=data.get("min_samples_split", 4),
             random_state=data.get("random_state", 42)
         )
         if "trees" in data:
@@ -718,6 +736,7 @@ def stratified_kfold_cv_scores(
         fold_metrics = compute_evaluation_metrics(y_train_part[val_idx], preds, classes)
         acc_scores.append(round(fold_acc, 4))
         f1_scores.append(round(fold_metrics["macro_f1"], 4))
+        del fold_X_tr_scaled, fold_X_val_scaled, clf, preds
 
     return {
         "supported": True,
@@ -850,15 +869,16 @@ def train_and_evaluate_pipeline(
     test_samples = len(y_test)
 
     # 4. Define Classifier Models Specifications
-    # Model parameters documented for reproducibility
+    # Resource-bounded specifications to maintain high ensemble performance while
+    # fitting within Render free tier memory constraints (512MB RAM, 0.1 vCPU).
     models_spec = {
         "Decision Tree": {
             "cls": DecisionTreeModel,
-            "kwargs": {"max_depth": 10, "min_samples_split": 4, "random_state": RANDOM_SEED}
+            "kwargs": {"max_depth": 8, "min_samples_split": 4, "random_state": RANDOM_SEED}
         },
         "Random Forest": {
             "cls": RandomForestModel,
-            "kwargs": {"n_estimators": 25, "max_depth": 10, "min_samples_split": 3, "random_state": RANDOM_SEED}
+            "kwargs": {"n_estimators": 12, "max_depth": 8, "min_samples_split": 4, "random_state": RANDOM_SEED}
         },
         "K-Nearest Neighbors": {
             "cls": KNNClassifierModel,
@@ -972,9 +992,20 @@ def train_and_evaluate_pipeline(
     os.makedirs(MODELS_DIR, exist_ok=True)
     model_artifact_path = os.path.join(MODELS_DIR, "best_crop_model.json")
     metadata_artifact_path = os.path.join(MODELS_DIR, "model_metadata.json")
+    tmp_model_path = model_artifact_path + ".tmp"
+    tmp_meta_path = metadata_artifact_path + ".tmp"
 
-    with open(model_artifact_path, "w", encoding="utf-8") as f:
-        json.dump(production_pipeline.to_dict(), f, indent=2)
+    try:
+        with open(tmp_model_path, "w", encoding="utf-8") as f:
+            json.dump(production_pipeline.to_dict(), f, indent=2)
+        os.replace(tmp_model_path, model_artifact_path)
+    except Exception as e:
+        if os.path.exists(tmp_model_path):
+            try:
+                os.remove(tmp_model_path)
+            except Exception:
+                pass
+        raise IOError(f"Failed to persist production model artifact: {str(e)}")
 
     champion_test_metrics = benchmark_results[best_model_name]
     metadata_payload = {
@@ -1012,8 +1043,22 @@ def train_and_evaluate_pipeline(
         "artifact_file": "models/best_crop_model.json"
     }
 
-    with open(metadata_artifact_path, "w", encoding="utf-8") as f:
-        json.dump(metadata_payload, f, indent=2)
+    try:
+        with open(tmp_meta_path, "w", encoding="utf-8") as f:
+            json.dump(metadata_payload, f, indent=2)
+        os.replace(tmp_meta_path, metadata_artifact_path)
+    except Exception as e:
+        if os.path.exists(tmp_meta_path):
+            try:
+                os.remove(tmp_meta_path)
+            except Exception:
+                pass
+        raise IOError(f"Failed to persist model metadata artifact: {str(e)}")
+
+    # Verification: ensure both artifacts exist and are non-empty
+    if not (os.path.exists(model_artifact_path) and os.path.getsize(model_artifact_path) > 0 and
+            os.path.exists(metadata_artifact_path) and os.path.getsize(metadata_artifact_path) > 0):
+        raise IOError("Artifact persistence verification failed: one or more artifact files are missing or empty.")
 
     return {
         "success": True,

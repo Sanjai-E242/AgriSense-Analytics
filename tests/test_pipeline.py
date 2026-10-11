@@ -111,5 +111,89 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(champ1, res2["champion_model"])
 
 
+    def test_resource_bounded_model_hyperparameters(self):
+        """Regression test: verifies tree depth and ensemble size remain bounded for free-tier deployment."""
+        dt = DecisionTreeClassifierModel()
+        self.assertLessEqual(dt.max_depth, 8)
+        self.assertGreaterEqual(dt.min_samples_split, 2)
+
+        rf = RandomForestClassifierModel()
+        self.assertLessEqual(rf.n_estimators, 15)
+        self.assertLessEqual(rf.max_depth, 8)
+        self.assertGreaterEqual(rf.min_samples_split, 2)
+
+    def test_tree_split_bounds_and_no_empty_partitions(self):
+        """Decision tree split prevents degenerate/empty child nodes and halts on pure or invariant data."""
+        # 1. Invariant feature values
+        X_const = np.ones((20, 7))
+        y_const = np.array(["rice"] * 20)
+        dt = DecisionTreeClassifierModel(max_depth=5)
+        dt.fit(X_const, y_const)
+        self.assertTrue(dt.root.is_leaf)
+        self.assertEqual(dt.root.value, "rice")
+
+        # 2. Distinct features: verify all non-leaf nodes have valid non-empty children
+        df = create_sample_df(40)
+        X = df[["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]].values
+        y = df["label"].values
+        dt.fit(X, y)
+
+        def verify_node(node):
+            if node is None or node.is_leaf:
+                return
+            self.assertIsNotNone(node.left)
+            self.assertIsNotNone(node.right)
+            verify_node(node.left)
+            verify_node(node.right)
+
+        verify_node(dt.root)
+
+    def test_model_serialization_and_deserialization_roundtrip(self):
+        """Random Forest and ModelPipeline serialize to dictionary/JSON and deserialize with identical predictions."""
+        df = create_sample_df(60)
+        X = df[["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]].values
+        y = df["label"].values
+
+        scaler = StandardScalerModel().fit(X)
+        X_s = scaler.transform(X)
+        rf = RandomForestClassifierModel(n_estimators=12, max_depth=8, random_state=42)
+        rf.fit(X_s, y)
+        preds_orig = rf.predict(X_s[:10])
+
+        d = rf.to_dict()
+        rf_loaded = RandomForestClassifierModel.from_dict(d)
+        preds_loaded = rf_loaded.predict(X_s[:10])
+        self.assertTrue(np.array_equal(preds_orig, preds_loaded))
+
+    def test_end_to_end_prediction_with_resource_bounded_pipeline(self):
+        """Full pipeline training and subsequent inference produces valid predictions with bounded metadata."""
+        df = create_sample_df(80)
+        res = train_and_evaluate_pipeline(
+            df=df,
+            dataset_name="bounded_pipeline_test.csv",
+            approved_by_user=True,
+            allow_fixture_for_testing=True
+        )
+        self.assertTrue(res["success"])
+
+        # Test inference via predict_crop
+        sample_input = {
+            "N": 50.0, "P": 40.0, "K": 35.0,
+            "temperature": 25.0, "humidity": 70.0,
+            "ph": 6.5, "rainfall": 120.0
+        }
+        pred_res = predict_crop(sample_input)
+        self.assertTrue(pred_res["success"])
+        self.assertIn(pred_res["predicted_crop"], df["label"].unique())
+        self.assertIn("champion_model", pred_res)
+
+        # Verify artifact files exist and are under 500 KB
+        model_path = os.path.join(MODELS_DIR, "best_crop_model.json")
+        meta_path = os.path.join(MODELS_DIR, "model_metadata.json")
+        self.assertTrue(os.path.exists(model_path) and os.path.getsize(model_path) > 0)
+        self.assertTrue(os.path.exists(meta_path) and os.path.getsize(meta_path) > 0)
+        self.assertLess(os.path.getsize(model_path), 500 * 1024)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -117,7 +117,9 @@ def clear_all_prediction_history() -> bool:
 
 def sanitize_for_json(obj: Any) -> Any:
     """Recursively converts NumPy scalars and arrays to native Python types for clean JSON serialization."""
-    if isinstance(obj, dict):
+    if isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    elif isinstance(obj, dict):
         return {str(k): sanitize_for_json(v) for k, v in obj.items()}
     elif isinstance(obj, (list, tuple)):
         return [sanitize_for_json(v) for v in obj]
@@ -125,8 +127,6 @@ def sanitize_for_json(obj: Any) -> Any:
         return int(obj)
     elif isinstance(obj, (np.floating, float)):
         return float(obj)
-    elif isinstance(obj, (np.bool_, bool)):
-        return bool(obj)
     elif isinstance(obj, np.ndarray):
         return sanitize_for_json(obj.tolist())
     return obj
@@ -498,6 +498,17 @@ def train_models():
         )
 
         if result.get("success"):
+            # Verify artifact persistence completeness
+            model_path = os.path.join(MODELS_DIR, "best_crop_model.json")
+            meta_path = os.path.join(MODELS_DIR, "model_metadata.json")
+            if not (os.path.exists(model_path) and os.path.getsize(model_path) > 0 and
+                    os.path.exists(meta_path) and os.path.getsize(meta_path) > 0):
+                return jsonify({
+                    "success": False,
+                    "error_type": "ARTIFACT_PERSISTENCE_FAILED",
+                    "message": "Model training finished but artifact persistence verification failed. Model artifacts are incomplete."
+                }), 500
+
             # Ensure dataset files are persisted locally if not already saved
             if not os.path.exists(active_csv) or os.path.getsize(active_csv) == 0:
                 try:

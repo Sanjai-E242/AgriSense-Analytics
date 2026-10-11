@@ -37,3 +37,6 @@ data/*.db
 !data/README.md
 models/*.json
 !models/README.md
+
+# Scratch and profiling scripts
+scratch/
