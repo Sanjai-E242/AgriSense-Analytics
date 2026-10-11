@@ -149,6 +149,50 @@ class TestAgriSenseAPI(unittest.TestCase):
         self.assertTrue(m_data.get("trained"))
         self.assertTrue(m_data.get("artifact_valid"))
 
+    def test_homepage_and_static_routes(self):
+        """Root / serves frontend/index.html with HTTP 200 and static CSS/JS resolve properly."""
+        root_res = self.app.get('/')
+        self.assertEqual(root_res.status_code, 200)
+        self.assertIn(b"AgriSense Analytics", root_res.data)
+
+        css_res = self.app.get('/css/tokens.css')
+        self.assertEqual(css_res.status_code, 200)
+
+        js_res = self.app.get('/js/app.js')
+        self.assertEqual(js_res.status_code, 200)
+
+    def test_predict_successful_after_training(self):
+        """Inference succeeds with HTTP 200 on trained model and records in SQLite history."""
+        self.app.post('/api/dataset-reset')
+        lines = ["N,P,K,temperature,humidity,ph,rainfall,label"]
+        for i in range(25):
+            lines.append(f"{50+i},{40+i},{30+i},25.0,80.0,6.5,150.0,crop_a")
+        for i in range(25):
+            lines.append(f"{80+i},{20+i},{10+i},30.0,60.0,7.0,100.0,crop_b")
+        csv_content = "\n".join(lines)
+
+        self.app.post('/api/train-models', json={
+            "approved_by_user": True,
+            "dataset_name": "inference_test_dataset.csv",
+            "csv_text": csv_content
+        })
+
+        pred_res = self.app.post('/api/predict', json={
+            "N": 55, "P": 45, "K": 35,
+            "temperature": 25.0, "humidity": 80.0,
+            "ph": 6.5, "rainfall": 150.0
+        })
+        self.assertEqual(pred_res.status_code, 200)
+        p_data = pred_res.get_json()
+        self.assertTrue(p_data.get("success"))
+        self.assertIn(p_data.get("predicted_crop"), ["crop_a", "crop_b"])
+
+        # Verify it was logged in prediction history
+        h_res = self.app.get('/api/prediction-history')
+        self.assertEqual(h_res.status_code, 200)
+        h_data = h_res.get_json()
+        self.assertGreaterEqual(h_data.get("count"), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

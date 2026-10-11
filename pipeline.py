@@ -103,47 +103,112 @@ class StandardScalerModel:
 # 2. CLASSIFIER 1: K-NEAREST NEIGHBORS (KNN)
 # ==============================================================================
 class KNNClassifierModel:
-    """K-Nearest Neighbors Classifier with Euclidean distance."""
-    def __init__(self, k: int = 5):
-        self.k = k
+    """
+    K-Nearest Neighbors Classifier with Euclidean distance.
+    Uses bounded-batch vectorized matrix multiplication to compute Euclidean distances
+    efficiently without massive memory allocations or slow per-sample Python loops.
+    """
+    def __init__(self, k: int = 5, batch_size: int = 64):
+        self.k = int(k)
+        self.batch_size = max(1, int(batch_size))
         self.X_train_ = None
         self.y_train_ = None
+        self._train_norm_sq = None
 
     def fit(self, X: np.ndarray, y: np.ndarray):
-        self.X_train_ = np.asarray(X, dtype=float)
-        self.y_train_ = np.asarray(y, dtype=str)
+        X_arr = np.asarray(X, dtype=float)
+        y_arr = np.asarray(y, dtype=str)
+
+        if X_arr.ndim != 2:
+            raise ValueError(f"Expected 2D training feature array, got {X_arr.ndim}D.")
+        if len(X_arr) == 0:
+            raise ValueError("Training dataset cannot be empty.")
+        if not np.all(np.isfinite(X_arr)):
+            raise ValueError("Training feature array contains non-finite (NaN or Inf) values.")
+        if y_arr.ndim != 1 or len(y_arr) != len(X_arr):
+            raise ValueError(f"Target length ({len(y_arr)}) must match sample count ({len(X_arr)}).")
+
+        self.X_train_ = X_arr
+        self.y_train_ = y_arr
+        # Precompute ||X_train||^2 for fast vectorized distance computation:
+        # ||A - B||^2 = ||A||^2 + ||B||^2 - 2 * (A . B^T)
+        self._train_norm_sq = np.sum(self.X_train_ ** 2, axis=1)
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        X = np.asarray(X, dtype=float)
         if self.X_train_ is None or self.y_train_ is None:
             raise ValueError("KNNClassifierModel has not been fitted.")
+
+        X_arr = np.asarray(X, dtype=float)
+        if X_arr.size == 0 or len(X_arr) == 0:
+            return np.array([], dtype=self.y_train_.dtype)
+
+        if X_arr.ndim != 2:
+            raise ValueError(f"Expected 2D query array, got {X_arr.ndim}D array.")
+
+        if X_arr.shape[1] != self.X_train_.shape[1]:
+            raise ValueError(
+                f"Feature count mismatch: model expects {self.X_train_.shape[1]} features, got {X_arr.shape[1]}."
+            )
+
+        if not np.all(np.isfinite(X_arr)):
+            raise ValueError("Query array contains non-finite (NaN or Inf) values.")
+
+        if self._train_norm_sq is None or len(self._train_norm_sq) != len(self.X_train_):
+            self._train_norm_sq = np.sum(self.X_train_ ** 2, axis=1)
+
+        n_train = len(self.X_train_)
+        k_val = min(max(1, self.k), n_train)
+        n_queries = len(X_arr)
         preds = []
-        k_val = min(self.k, len(self.X_train_))
-        for x in X:
-            dists = np.linalg.norm(self.X_train_ - x, axis=1)
-            nn_idx = np.argsort(dists)[:k_val]
-            nn_labels = self.y_train_[nn_idx]
-            # Majority voting with distance tie-break
-            unique, counts = np.unique(nn_labels, return_counts=True)
-            winner = unique[np.argmax(counts)]
-            preds.append(winner)
+
+        # Vectorized evaluation in bounded batches (default 64) prevents OOM
+        # while taking full advantage of optimized C/BLAS matrix multiplications
+        batch_size = self.batch_size
+        for start_idx in range(0, n_queries, batch_size):
+            end_idx = min(start_idx + batch_size, n_queries)
+            batch_X = X_arr[start_idx:end_idx]
+
+            # Query squared norms: shape (batch_len,)
+            batch_query_norm_sq = np.sum(batch_X ** 2, axis=1)
+
+            # Squared Euclidean distance matrix: shape (batch_len, n_train)
+            # ||x - x_tr||^2 = ||x||^2 + ||x_tr||^2 - 2 * (x . x_tr^T)
+            batch_dist_sq = np.maximum(
+                batch_query_norm_sq[:, None] + self._train_norm_sq[None, :] - 2.0 * np.dot(batch_X, self.X_train_.T),
+                0.0
+            )
+
+            # Nearest k neighbors indices
+            batch_nn_idx = np.argsort(batch_dist_sq, axis=1)[:, :k_val]
+
+            # Vote per sample in batch with deterministic tie-breaking
+            for i in range(len(batch_X)):
+                nn_idx = batch_nn_idx[i]
+                nn_labels = self.y_train_[nn_idx]
+                unique, counts = np.unique(nn_labels, return_counts=True)
+                # np.unique sorts labels alphabetically, np.argmax picks first max occurrence
+                winner = unique[np.argmax(counts)]
+                preds.append(winner)
+
         return np.array(preds)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "K-Nearest Neighbors",
             "k": int(self.k),
+            "batch_size": int(self.batch_size),
             "X_train": self.X_train_.tolist() if self.X_train_ is not None else [],
             "y_train": self.y_train_.tolist() if self.y_train_ is not None else []
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        knn = cls(k=data.get("k", 5))
+        knn = cls(k=data.get("k", 5), batch_size=data.get("batch_size", 64))
         if "X_train" in data and "y_train" in data and len(data["X_train"]) > 0:
             knn.X_train_ = np.array(data["X_train"], dtype=float)
             knn.y_train_ = np.array(data["y_train"], dtype=str)
+            knn._train_norm_sq = np.sum(knn.X_train_ ** 2, axis=1)
         return knn
 
 # ==============================================================================

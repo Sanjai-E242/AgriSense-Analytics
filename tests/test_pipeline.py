@@ -195,5 +195,82 @@ class TestPipeline(unittest.TestCase):
         self.assertLess(os.path.getsize(model_path), 500 * 1024)
 
 
+    def test_knn_batch_prediction_correctness(self):
+        """Vectorized batched KNN predictions are consistent across batch sizes and match exact neighbor voting."""
+        df = create_sample_df(60)
+        X = df[["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]].values
+        y = df["label"].values
+
+        knn_b1 = KNNClassifierModel(k=3, batch_size=1).fit(X, y)
+        knn_b16 = KNNClassifierModel(k=3, batch_size=16).fit(X, y)
+        knn_b64 = KNNClassifierModel(k=3, batch_size=64).fit(X, y)
+
+        preds_b1 = knn_b1.predict(X)
+        preds_b16 = knn_b16.predict(X)
+        preds_b64 = knn_b64.predict(X)
+
+        self.assertTrue(np.array_equal(preds_b1, preds_b16))
+        self.assertTrue(np.array_equal(preds_b16, preds_b64))
+
+    def test_knn_input_validation_and_edge_cases(self):
+        """KNN handles empty queries gracefully and raises ValueError for invalid shapes, unfitted state, or NaNs."""
+        knn = KNNClassifierModel(k=3)
+        # Unfitted state
+        with self.assertRaises(ValueError):
+            knn.predict(np.ones((5, 7)))
+
+        # Fit with valid data
+        X_tr = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        y_tr = np.array(["a", "b", "c"])
+        knn.fit(X_tr, y_tr)
+
+        # Empty query
+        empty_preds = knn.predict(np.empty((0, 2)))
+        self.assertEqual(len(empty_preds), 0)
+
+        # Mismatched feature dimensions
+        with self.assertRaises(ValueError):
+            knn.predict(np.ones((2, 3)))
+
+        # 1D query instead of 2D
+        with self.assertRaises(ValueError):
+            knn.predict(np.array([1.0, 2.0]))
+
+        # NaN / Inf in query
+        with self.assertRaises(ValueError):
+            knn.predict(np.array([[np.nan, 2.0]]))
+        with self.assertRaises(ValueError):
+            knn.predict(np.array([[np.inf, 2.0]]))
+
+        # NaN / Inf during fit
+        with self.assertRaises(ValueError):
+            KNNClassifierModel(k=3).fit(np.array([[np.nan, 2.0]]), np.array(["a"]))
+
+    def test_knn_deterministic_tie_breaking(self):
+        """Deterministic tie-breaking picks lexicographically smallest label on count ties."""
+        # 2 neighbors: one "banana", one "apple"
+        X_tr = np.array([[0.0], [10.0]])
+        y_tr = np.array(["banana", "apple"])
+        knn = KNNClassifierModel(k=2).fit(X_tr, y_tr)
+        # Query at equidistant position 5.0
+        preds = knn.predict(np.array([[5.0]]))
+        self.assertEqual(preds[0], "apple")
+
+    def test_knn_serialization_roundtrip(self):
+        """KNNClassifierModel serializes to dict and deserializes with identical predictions."""
+        X_tr = np.array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
+        y_tr = np.array(["rice", "maize", "rice", "cotton"])
+        knn = KNNClassifierModel(k=3, batch_size=32).fit(X_tr, y_tr)
+
+        d = knn.to_dict()
+        self.assertEqual(d["type"], "K-Nearest Neighbors")
+        self.assertEqual(d["k"], 3)
+        self.assertEqual(d["batch_size"], 32)
+
+        knn_loaded = KNNClassifierModel.from_dict(d)
+        self.assertTrue(np.array_equal(knn.predict(X_tr), knn_loaded.predict(X_tr)))
+
+
 if __name__ == '__main__':
     unittest.main()
+

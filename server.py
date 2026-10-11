@@ -14,18 +14,20 @@ import numpy as np
 import pandas as pd
 from validator import validate_csv_content
 
-app = Flask(__name__, static_folder=".")
-app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB Max Upload Limit
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 DB_PATH = os.path.join(DATA_DIR, "prediction_history.db")
 
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
+app.config['MAX_CONTENT_LENGTH'] = 15 * 1024 * 1024  # 15 MB Max Upload Limit
+
 def init_history_db():
     """Initializes local SQLite database for prediction audit trails."""
     os.makedirs(DATA_DIR, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
+    conn = sqlite3.connect(DB_PATH)
+    try:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS prediction_history (
@@ -45,12 +47,15 @@ def init_history_db():
             )
         """)
         conn.commit()
+    finally:
+        conn.close()
 
 def record_prediction_history(inputs: Dict[str, Any], predicted_crop: str, champion_model: str, dataset_name: str, dataset_fingerprint: str):
     """Appends an authentic inference record to SQLite audit trail."""
     init_history_db()
     now_ts = datetime.datetime.now().isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
+    conn = sqlite3.connect(DB_PATH)
+    try:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO prediction_history (
@@ -72,6 +77,8 @@ def record_prediction_history(inputs: Dict[str, Any], predicted_crop: str, champ
             str(dataset_fingerprint or "")
         ))
         conn.commit()
+    finally:
+        conn.close()
 
 def get_all_prediction_history() -> List[Dict[str, Any]]:
     """Retrieves all logged inference records in reverse chronological order."""
@@ -79,7 +86,8 @@ def get_all_prediction_history() -> List[Dict[str, Any]]:
         return []
     try:
         init_history_db()
-        with sqlite3.connect(DB_PATH) as conn:
+        conn = sqlite3.connect(DB_PATH)
+        try:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("""
@@ -98,6 +106,8 @@ def get_all_prediction_history() -> List[Dict[str, Any]]:
                 d['model_identifier'] = d.get('champion_model')
                 records.append(d)
             return records
+        finally:
+            conn.close()
     except Exception:
         return []
 
@@ -107,11 +117,14 @@ def clear_all_prediction_history() -> bool:
         return True
     try:
         init_history_db()
-        with sqlite3.connect(DB_PATH) as conn:
+        conn = sqlite3.connect(DB_PATH)
+        try:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM prediction_history")
             conn.commit()
-        return True
+            return True
+        finally:
+            conn.close()
     except Exception:
         return False
 
